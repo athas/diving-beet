@@ -46,7 +46,7 @@ insertable = [ ('fire', 12),
 
 num_insertable = len(insertable)
 
-selection = 7 # sand is selected initially
+selection = 8 # sand is selected initially
 
 modify_radius = 5
 
