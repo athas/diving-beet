@@ -67,7 +67,7 @@ while True:
                    (futhark_time, blit_time)
     showText(speedmessage, (10, 10))
 
-    showText(insertable[selection][0], (10,30))
+    showText('%s (radius %d)' % (insertable[selection][0], modify_radius), (10,40))
 
     pygame.display.flip()
 
@@ -76,9 +76,9 @@ while True:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 4:
-                selection = (selection - 1) % num_insertable
+                modify_radius = min(modify_radius + 1, 100)
             if event.button == 5:
-                selection = (selection + 1) % num_insertable
+                modify_radius = max(modify_radius - 1, 1)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 selection = (selection + 1) % num_insertable
@@ -90,6 +90,6 @@ while True:
             beet_state = beet.add_element(*args)
         if pygame.mouse.get_pressed()[2] and pygame.mouse.get_pos() != None:
             # remove any element element here.
-            args = beet_state + pygame.mouse.get_pos() + (modify_radius, 0)
-            beet_state = beet.add_element(*args)
+            args = beet_state + pygame.mouse.get_pos() + (modify_radius,)
+            beet_state = beet.clear_element(*args)
 

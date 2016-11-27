@@ -15,8 +15,9 @@ fun applyGravity' (wenv: weight_env): (MargPos, MargPos, MargPos, MargPos) =
   let mask = wenv & 0b01010101u8 in
   if      ignoreL 3 wenv                         == 0b00111111u8 then (0,1,3,2)
   else if ignoreL 2 wenv                         == 0b11001111u8 then (0,1,3,2)
+
   else if ignoreL 3 (ignoreL 2 (ignoreL 1 wenv)) == 0b01010011u8 then (1,0,2,3)
-  else if ignoreL 3 (ignoreL 2 (ignoreL 0 wenv)) == 0b01011100u8 then (0,1,3,2)
+  else if ignoreL 3 (ignoreL 2 (ignoreL 0 wenv)) == 0b01011100u8 then (1,0,3,2)
   else if ignoreL 3 (ignoreL 1 (ignoreL 0 wenv)) == 0b00110000u8 then (0,1,3,2)
   else if ignoreL 2 (ignoreL 1 (ignoreL 0 wenv)) == 0b11000000u8 then (0,1,3,2)
 

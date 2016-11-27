@@ -44,7 +44,7 @@ fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
   else if x == spout && y == nothing
   then (spout, water)
 
-  -- fire + plant = new fire + sand
+  -- fire + plant = new fire + sand OR new fire + new fire
   else if isFire x && y == plant
   then if r < 20 then (fire, sand) else (fire, fire)
   else if x == plant && isFire y
@@ -90,9 +90,9 @@ fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
   else if x == lava && y == water then (stone, steam_water)
 
   -- salt_water + lava = steam + stone OR steam + salt
-  else if x == salt_water && y == lava
-  then if r < 20 then (steam_water, salt) else (steam_water, stone)
-  else if x == lava && y == salt_water
-  then if r < 20 then (salt, steam_water) else (stone, steam_water)
+  else if x == salt_water && y == lava then
+    (if r < 20 then (steam_water, salt) else (steam_water, stone))
+  else if x == lava && y == salt_water then
+    (if r < 20 then (salt, steam_water) else (stone, steam_water))
 
   else (x,y)

@@ -106,16 +106,16 @@ fun weigh (env: env, pos: MargPos): MargPos =
 fun isNextHeaviest (heaviest: weight) (acc: weight) (x: weight): weight =
   if acc == heaviest then x else max_weight acc x
 
-fun alchemy (i: int) (env: env): env =
+fun alchemy (r: int) (env: env): env =
   let (ul0, ur0, dl0, dr0) = splitEnv env
-  -- Apply interaction among the components
-  let (ul1, ur1) = applyAlchemy i ul0 ur0
-  let (ur , dr2) = applyAlchemy i ur1 dr0
-  let (dr , dl3) = applyAlchemy i dr2 dl0
-  let (dl , ul ) = applyAlchemy i dl3 ul1
   in if ul0 == ur0 && ur0 == dl0 && dl0 == dr0
      then env
-     else combine (ul, ur, dl, dr)
+     else -- Apply interaction among the components
+          let (ul1, ur1) = applyAlchemy r ul0 ur0
+          let (ur , dr2) = applyAlchemy r ur1 dr0
+          let (dr , dl3) = applyAlchemy r dr2 dl0
+          let (dl , ul ) = applyAlchemy r dl3 ul1
+          in combine (ul, ur, dl, dr)
 
 -- | Position of cells in a block automaton
 --   0 1 0 1 ....
