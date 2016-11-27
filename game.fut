@@ -77,3 +77,39 @@ entry clear_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_po
 
 fun dist (x0:int,y0:int) (x1:int,y1:int): f32 =
   sqrt32 (f32 ((x0-x1)**2 + (y0-y1)**2))
+
+entry insertable_elements(): []element =
+ [ oil
+ , water
+ , salt_water
+ , sand
+ , salt
+ , stone
+ , fire
+ , torch
+ , plant
+ , spout
+ , metal
+ , lava
+ , turnip
+ , wall ]
+
+entry element_name(x: element): []int =
+  if x == nothing then "nothing"
+  else if x == steam_water then "steam"
+  else if x == steam_condensed then "condensate"
+  else if x == oil then "oil"
+  else if x == water then "water"
+  else if x == salt_water then "salt water"
+  else if x == sand then "sand"
+  else if x == salt then "salt"
+  else if x == stone then "stone"
+  else if isFire x then "fire"
+  else if x == torch then "torch"
+  else if x == plant then "plant"
+  else if x == spout then "spout"
+  else if x == metal then "metal"
+  else if x == lava then "lava"
+  else if x == turnip then "random"
+  else if x == wall then "wall"
+  else "unnamed element"

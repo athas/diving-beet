@@ -29,29 +29,25 @@ def showText(what, where):
     text = font.render(what, 1, (255, 255, 255))
     screen.blit(text, where)
 
-insertable = [ ('fire', 12),
-               ('lava', 27),
-               ('oil', 6),
-               ('metal', 26),
-               ('plant', 24),
-               ('random', 28),
-               ('salt water', 8),
-               ('salt', 10),
-               ('sand', 9),
-               ('spout', 25),
-               ('stone', 11),
-               ('torch', 23),
-               ('wall', 29),
-               ('water', 7)]
-
-num_insertable = len(insertable)
-
-selection = 8 # sand is selected initially
-
-modify_radius = 5
-
 beet = game.game()
 beet_state = beet.new_game(height, width)
+
+# Initialise the list of insertable elements and their names.
+insertable = []
+for elem in beet.insertable_elements().get():
+    name = ''.join(map(chr,list(beet.element_name(elem).get())))
+    insertable += [(name, elem)]
+insertable.sort()
+num_insertable = len(insertable)
+
+selection = 0
+# Set the initial selection to sand.
+for i in range(num_insertable):
+    if insertable[i][0] == 'sand':
+        selection = i
+        break
+
+modify_radius = 5
 
 while True:
     start = time.time()
