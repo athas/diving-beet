@@ -29,7 +29,8 @@ def showText(what, where):
     text = font.render(what, 1, (255, 255, 255))
     screen.blit(text, where)
 
-insertable = [ ('lava', 27),
+insertable = [ ('fire', 12),
+               ('lava', 27),
                ('oil', 6),
                ('metal', 26),
                ('plant', 24),
@@ -44,7 +45,7 @@ insertable = [ ('lava', 27),
 
 num_insertable = len(insertable)
 
-selection = 6 # sand is selected initially
+selection = 7 # sand is selected initially
 
 modify_radius = 5
 
