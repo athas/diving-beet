@@ -45,10 +45,10 @@ fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
   then (spout, water)
 
   -- fire + plant = new fire + sand
-  else if r < 20 && isFire x && y == plant
-  then (fire, sand)
-  else if r < 20 && x == plant && isFire y
-  then (sand, fire)
+  else if isFire x && y == plant
+  then if r < 20 then (fire, sand) else (fire, fire)
+  else if x == plant && isFire y
+  then if r < 20 then (sand, fire) else (fire, fire)
 
   -- water + plant = plant + plant
   else if x == water && y == plant
@@ -61,22 +61,21 @@ fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
   then (water, sand)
   else if x == metal && y == water && r < 1
   then (sand, water)
-  else if x == salt_water && y == metal && 3 < 3
+  else if x == salt_water && y == metal && r < 3
   then (salt_water, sand)
   else if x == metal && y == salt_water && r < 3
   then (sand, salt_water)
 
-  -- lava + stone = lava + lava
-  else if x == lava && y == stone && r < 5
-  then (lava, lava)
-  else if x == stone && y == lava && r < 5
-  then (lava, lava)
+  -- lava + stone/metal/sand/salt = 2 * lava
+  else if x == lava && y == stone && r < 5 then (lava, lava)
+  else if x == stone && y == lava && r < 5 then (lava, lava)
 
-  -- lava + metal/sand/salt = 2 * lava
   else if x == lava && y == metal && r < 1 then (lava, lava)
   else if x == metal && y == lava && r < 1 then (lava, lava)
+
   else if x == lava && y == sand && r < 50 then (lava, lava)
   else if x == sand && y == lava && r < 50 then (lava, lava)
+
   else if x == lava && y == salt && r < 50 then (lava, lava)
   else if x == salt && y == lava && r < 50 then (lava, lava)
 

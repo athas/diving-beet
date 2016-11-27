@@ -13,7 +13,7 @@ fun rand_array (seed: int) (n: int) (lower: int, upper: int): [n]int =
   map (fn (i: int): int  =>
         -- We hash i+n to ensure that a random length-n array is not a
         -- prefix of a random length-(n+m) array.
-        (seed ^ hash (i+n)) % (upper-lower+1) + lower) (iota n)
+        (hash (seed ^ i+n)) % (upper-lower+1) + lower) (iota n)
 
 fun randomishInt2Array ((h,w): (int,int)) ((lower,upper): (int,int)) (gen: int): [h][w]int =
   reshape (h,w) (rand_array gen (h*w) (lower,upper))

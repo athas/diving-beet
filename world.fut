@@ -73,11 +73,3 @@ fun age (r: int) (x: element): element =
   else if x == steam_condensed then if r < 5 then water else steam_condensed
   else if x == turnip then unsafe elems[(r*num_elems) / 110]
   else x
-
-fun age' (x: element): (int, element, element) =
-  if x == fire_end then (0, nothing, nothing)
-  else if isFire x then (50, x + 1u32, x)
-  else if x == steam_water then (1, water, steam_water)
-  else if x == steam_condensed then (5, water, steam_condensed)
-  else if x == turnip then (50, water, fire)
-  else (0, x, x)

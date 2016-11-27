@@ -51,8 +51,8 @@ fun elemColour (x: element): int =
   else if x == wall
   then grayN 0.4f32
   else if isFire x
-  then mix_colours (1.0f32 * f32 (x - fire))
-                   (1.0f32 * f32 (fire_end - x))
+  then mix_colours (f32 (x - fire))
+                   (f32 (fire_end - x))
                    red yellow
   else black -- handles 'nothing'
 
