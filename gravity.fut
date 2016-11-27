@@ -1,17 +1,17 @@
-fun applyGravity (x: weight_env) (n: MargPos): MargPos =
+fun applyGravity (x: weight_env) (n: marg_pos): marg_pos =
   let (a,b,c,d) = applyGravity' x
   in if      n == 0 then a
      else if n == 1 then b
      else if n == 2 then c
      else                d
 
-fun ignoreL (n: MargPos) (x: weight_env): weight_env =
+fun ignoreL (n: marg_pos) (x: weight_env): weight_env =
   if      n == 0 then x & 0b11111101u8
   else if n == 1 then x & 0b11110111u8
   else if n == 2 then x & 0b11011111u8
   else                x & 0b01111111u8
 
-fun applyGravity' (wenv: weight_env): (MargPos, MargPos, MargPos, MargPos) =
+fun applyGravity' (wenv: weight_env): (marg_pos, marg_pos, marg_pos, marg_pos) =
   let mask = wenv & 0b01010101u8 in
   if      ignoreL 3 wenv                         == 0b00111111u8 then (0,1,3,2)
   else if ignoreL 2 wenv                         == 0b11001111u8 then (0,1,3,2)

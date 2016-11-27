@@ -2,8 +2,8 @@ include step
 include draw
 
 type game_state = (int,         -- generation
-                   [][]MargPos, -- current Margolus mask
-                   [][]MargPos, -- next Margolus mask
+                   [][]marg_pos, -- current Margolus mask
+                   [][]marg_pos, -- next Margolus mask
                    [][]element  -- state of the world
                   )
 
@@ -12,11 +12,11 @@ entry new_game (h:int,w:int): game_state =
   margMaskEven (h,w), margMaskOdd (h,w),
   replicate h (replicate w nothing))
 
-entry step_game(gen: int, cur_mask: [h][w]MargPos, next_mask: [h][w]MargPos,
+entry step_game(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
                 elems: [h][w]element): game_state =
   (gen + 1, next_mask, cur_mask, step gen cur_mask elems)
 
-entry render(_: int, _: [h][w]MargPos, _: [h][w]MargPos, elems: [h][w]element): [w][h]int =
+entry render(_: int, _: [h][w]marg_pos, _: [h][w]marg_pos, elems: [h][w]element): [w][h]int =
   map (fn r => map elemColour r) (transpose elems)
 
 fun elemColour (x: element): int =
@@ -60,14 +60,14 @@ entry main (h:int,w:int): game_state =
   let state = new_game (h,w)
   in step_game state
 
-entry add_element(gen: int, cur_mask: [h][w]MargPos, next_mask: [h][w]MargPos,
+entry add_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
                   elems: [h][w]element) (pos: (int,int)) (r: int) (elem: element): game_state =
   (gen, cur_mask, next_mask,
   map (fn y => map (fn x => if elems[y,x] == nothing && int (dist (x,y) pos) < r
                             then elem
                             else elems[y,x]) (iota w)) (iota h))
 
-entry clear_element(gen: int, cur_mask: [h][w]MargPos, next_mask: [h][w]MargPos,
+entry clear_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
                    elems: [h][w]element) (pos: (int,int)) (r: int): game_state =
   (gen, cur_mask, next_mask,
   map (fn y => map (fn x => if int (dist (x,y) pos) < r

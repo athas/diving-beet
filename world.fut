@@ -5,7 +5,7 @@ type weight = u8
 type weight_env = u8
 
 -- Position in a Margolus neighborhood; ranges from 0-3.
-type MargPos = int
+type marg_pos = int
 
 val nothing: element = 0u32
 val steam_water: element = 1u32
