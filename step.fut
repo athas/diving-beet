@@ -76,11 +76,8 @@ fun weigh (env: env, pos: MargPos): MargPos =
 
   let x = if isWall (margQuadrant x' env) then pos else x'
 
-  let nextHeaviest = isNextHeaviest heaviest
-                     (isNextHeaviest heaviest
-                      (isNextHeaviest heaviest
-                       (isNextHeaviest heaviest heaviest (weight ul'))
-                       (weight ur')) (weight dl')) (weight dr')
+  let nextHeaviest = secondHeaviest (weight ul', weight ur', weight dl', weight dr')
+  let allSameWeight = weight ul' == weight ur' && weight ur' == weight dl' && weight dl' == weight dr'
 
   -- Compare each cell with the second heaviest, lowest bit set if >=
   let ul2 = u8 (weight ul' >= nextHeaviest) | isFluid ul'
@@ -99,12 +96,15 @@ fun weigh (env: env, pos: MargPos): MargPos =
 
   in if      (ul' == ur' && ur' == dl' && dl' == dr')   then pos
      else if isWall current                             then pos
-     else if x != pos || nextHeaviest == heaviest       then x
+     else if x != pos || allSameWeight                  then x
      else if ydest == y                                 then y
      else x
 
-fun isNextHeaviest (heaviest: weight) (acc: weight) (x: weight): weight =
-  if acc == heaviest then x else max_weight acc x
+fun secondHeaviest (a: weight, b: weight, c: weight, d: weight): weight =
+  let (a,b) = if a < b then (b,a) else (a,b)
+  let (c,d) = if c < d then (d,c) else (c,d)
+  let (b,c) = if a < c then (d,a) else (b,c)
+  in if b < c then c else b
 
 fun alchemy (r: int) (env: env): env =
   let (ul0, ur0, dl0, dr0) = splitEnv env
