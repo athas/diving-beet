@@ -6,17 +6,22 @@ import pygame
 import time
 import sys
 
-width=1200
-height=800
+fullscreen = False
 
-size=(width,height)
-beet = game.game()
-beet_state = beet.new_game(height, width)
+if fullscreen:
+    desired_size = None
+else:
+    desired_size = (1200,800)
 
 pygame.init()
 pygame.display.set_caption('Diving Beet')
-screen = pygame.display.set_mode(size)
-surface = pygame.Surface(size)
+if desired_size != None:
+    screen = pygame.display.set_mode(desired_size)
+else:
+    screen = pygame.display.set_mode()
+width = screen.get_width()
+height = screen.get_height()
+size = (width,height)
 font = pygame.font.Font(None, 36)
 pygame.key.set_repeat(100, 100)
 
@@ -43,12 +48,26 @@ selection = 6 # sand is selected initially
 
 modify_radius = 5
 
-while True:
-    frame = beet.render(*beet_state).get()
-    pygame.surfarray.blit_array(surface, frame)
-    screen.blit(surface, (0, 0))
+beet = game.game()
+beet_state = beet.new_game(height, width)
 
-    showText(insertable[selection][0], (10,10))
+while True:
+    start = time.time()
+    beet_state = beet.step_game(*beet_state)
+    frame = beet.render(*beet_state).get()
+    end = time.time()
+    futhark_time = (end-start)*1000
+
+    start = time.time()
+    pygame.surfarray.blit_array(screen, frame)
+    end = time.time()
+    blit_time = (end-start)*1000
+
+    speedmessage = "Futhark call took %.2fms; blitting %.2fms" % \
+                   (futhark_time, blit_time)
+    showText(speedmessage, (10, 10))
+
+    showText(insertable[selection][0], (10,30))
 
     pygame.display.flip()
 
@@ -74,4 +93,3 @@ while True:
             args = beet_state + pygame.mouse.get_pos() + (modify_radius, 0)
             beet_state = beet.add_element(*args)
 
-    beet_state = beet.step_game(*beet_state)
