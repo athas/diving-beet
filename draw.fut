@@ -2,7 +2,7 @@
 type colour = int
 
 fun mk_colour (r: int) (g: int) (b: int): colour =
-  ((r&0xFF) << 16) | ((g&0xFF)<<8) | (b&0xFF)
+  ((min_channel r 255) << 16) | (min_channel g 255<<8) | (min_channel b 255)
 
 fun rgb_of_colour (x: colour): (int,int,int) =
   ((x>>16) & 0xFF,
@@ -56,6 +56,9 @@ fun dark (c: colour): colour =
 
 fun max_channel (x: int) (y: int): int =
   if x < y then y else x
+
+fun min_channel (x: int) (y: int): int =
+  if x < y then x else y
 
 val black: colour = mk_colour 0 0 0
 val red: colour = mk_colour 255 0 0

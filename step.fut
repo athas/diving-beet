@@ -9,14 +9,14 @@ fun hash(x: int): int =
   let x = ((x >> 16) ^ x) in
   x
 
-fun rand_array(n: int) (lower: int, upper: int): [n]int =
+fun rand_array (seed: int) (n: int) (lower: int, upper: int): [n]int =
   map (fn (i: int): int  =>
         -- We hash i+n to ensure that a random length-n array is not a
         -- prefix of a random length-(n+m) array.
-        hash(i+n) % (upper-lower+1) + lower) (iota n)
+        (seed ^ hash (i+n)) % (upper-lower+1) + lower) (iota n)
 
 fun randomishInt2Array ((h,w): (int,int)) ((lower,upper): (int,int)) (gen: int): [h][w]int =
-  reshape (h,w) (map (^gen) (rand_array (h*w) (lower,upper)))
+  reshape (h,w) (rand_array gen (h*w) (lower,upper))
 
 fun step (gen: int) (mask: [h][w]MargPos) (array: [h][w]element): [h][w]element =
   let randomish = randomishInt2Array (h, w) (0,100) gen
@@ -134,26 +134,27 @@ fun margStencil (array: [h][w](element, MargPos)): [h][w](env, MargPos) =
   map(fn y => map(fn x =>
          let (me, marg_pos) = array[y,x]
          let new =
-           if      marg_pos == 0 then
-             margGet array (y+1) (x-1) |
-             margGet array (y+1) x     |
-             margGet array y     (x-1) |
-             me
-           else if marg_pos == 1 then
-             margGet array (y+1) x     |
-             margGet array (y+1) (x+1) |
-             margGet array y     (x+1) |
-             (me << 8u32)
-           else if marg_pos == 2 then
-             margGet array y     (x-1) |
-             margGet array (y-1) (x-1) |
-             margGet array (y-1) x     |
-             (me << 16u32)
-           else
-             margGet array y     (x+1) |
-             margGet array (y-1) x     |
-             margGet array (y-1) (x+1) |
-             (me << 24u32)
+           combine
+           (if marg_pos == 0 then
+              (me,
+               margGet array y     (x+1),
+               margGet array (y+1) x,
+               margGet array (y+1) (x-1))
+            else if marg_pos == 1 then
+              (margGet array y     (x-1),
+               me,
+               margGet array (y+1) (x-1),
+               margGet array (y+1) x)
+            else if marg_pos == 2 then
+              (margGet array (y-1) x,
+               margGet array (y-1) (x+1),
+               me,
+               margGet array y     (x+1))
+            else
+              (margGet array (y-1) (x-1),
+               margGet array (y-1) x,
+               margGet array y     (x-1),
+               me))
          in (new, marg_pos))
        (iota w)) (iota h)
 

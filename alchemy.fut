@@ -53,25 +53,47 @@ fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
   -- water + plant = plant + plant
   else if x == water && y == plant
   then (plant, plant)
-  else if x == plant && y == plant
+  else if x == plant && y == water
   then (plant, plant)
 
   -- water/salt_water + metal = water/salt_water + sand
-  else if x == water && y == metal
+  else if x == water && y == metal && r < 1
   then (water, sand)
-  else if x == metal && y == water
+  else if x == metal && y == water && r < 1
   then (sand, water)
-  else if x == salt_water && y == metal
+  else if x == salt_water && y == metal && 3 < 3
   then (salt_water, sand)
-  else if x == metal && y == salt_water
+  else if x == metal && y == salt_water && r < 3
   then (sand, salt_water)
 
   -- lava + stone = lava + lava
-  else if x == lava && y == stone
+  else if x == lava && y == stone && r < 5
   then (lava, lava)
-  else if x == stone && y == lava
+  else if x == stone && y == lava && r < 5
   then (lava, lava)
 
-  -- then some more
+  -- lava + metal/sand/salt = 2 * lava
+  else if x == lava && y == metal && r < 1 then (lava, lava)
+  else if x == metal && y == lava && r < 1 then (lava, lava)
+  else if x == lava && y == sand && r < 50 then (lava, lava)
+  else if x == sand && y == lava && r < 50 then (lava, lava)
+  else if x == lava && y == salt && r < 50 then (lava, lava)
+  else if x == salt && y == lava && r < 50 then (lava, lava)
+
+  -- lava + oil/plant = lava + fire
+  else if x == lava && y == oil && r < 80 then (lava, fire)
+  else if x == oil && y == lava && r < 80 then (fire, lava)
+  else if x == lava && y == plant && r < 80 then (lava, fire)
+  else if x == plant && y == lava && r < 80 then (fire, lava)
+
+  -- water + lava = steam + stone
+  else if x == water && y == lava then (steam_water, stone)
+  else if x == lava && y == water then (stone, steam_water)
+
+  -- salt_water + lava = steam + stone OR steam + salt
+  else if x == salt_water && y == lava
+  then if r < 20 then (steam_water, salt) else (steam_water, stone)
+  else if x == lava && y == salt_water
+  then if r < 20 then (salt, steam_water) else (stone, steam_water)
 
   else (x,y)
