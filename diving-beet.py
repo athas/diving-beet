@@ -82,12 +82,12 @@ while True:
                 selection = (selection + 1) % num_insertable
             if event.key == pygame.K_LEFT:
                 selection = (selection - 1) % num_insertable
-        if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
-            # insert the selected element here.
-            args = beet_state + pygame.mouse.get_pos() + (modify_radius, insertable[selection][1])
-            beet_state = beet.add_element(*args)
-        if pygame.mouse.get_pressed()[2] and pygame.mouse.get_pos() != None:
-            # remove any element element here.
-            args = beet_state + pygame.mouse.get_pos() + (modify_radius,)
-            beet_state = beet.clear_element(*args)
 
+    if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
+        # insert the selected element here.
+        args = beet_state + pygame.mouse.get_pos() + (modify_radius, insertable[selection][1])
+        beet_state = beet.add_element(*args)
+    if pygame.mouse.get_pressed()[2] and pygame.mouse.get_pos() != None:
+        # remove any element element here.
+        args = beet_state + pygame.mouse.get_pos() + (modify_radius,)
+        beet_state = beet.clear_element(*args)

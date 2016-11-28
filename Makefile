@@ -9,4 +9,4 @@ game.py: $(FUTHARK_SRC)
 	futhark-pyopencl --library game.fut
 
 clean:
-	rm -f *.pyc
+	rm -f *.pyc game.py

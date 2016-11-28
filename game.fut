@@ -56,10 +56,6 @@ fun elemColour (x: element): int =
                    red yellow
   else black -- handles 'nothing'
 
-entry main (h:int,w:int): game_state =
-  let state = new_game (h,w)
-  in step_game state
-
 entry add_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
                   elems: [h][w]element) (pos: (int,int)) (r: int) (elem: element): game_state =
   (gen, cur_mask, next_mask,
