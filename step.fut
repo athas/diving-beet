@@ -15,11 +15,11 @@ fun rand_array (seed: int) (n: int) (lower: int, upper: int): [n]int =
         -- prefix of a random length-(n+m) array.
         (hash (seed ^ i+n)) % (upper-lower+1) + lower) (iota n)
 
-fun randomishInt2Array ((h,w): (int,int)) ((lower,upper): (int,int)) (gen: int): [h][w]int =
-  reshape (h,w) (rand_array gen (h*w) (lower,upper))
+fun randomishInt2Array ((w,h): (int,int)) ((lower,upper): (int,int)) (gen: int): [w][h]int =
+  reshape (w,h) (rand_array gen (w*h) (lower,upper))
 
-fun step (gen: int) (mask: [h][w]marg_pos) (array: [h][w]element): [h][w]element =
-  let randomish = randomishInt2Array (h, w) (0,100) gen
+fun step (gen: int) (mask: [w][h]marg_pos) (array: [w][h]element): [w][h]element =
+  let randomish = randomishInt2Array (w,h) (0,100) gen
   let envs = map (fn as bcs => map (fn a (b,c) => (alchemy a b, c)) as bcs)
                  randomish (margStencil (zip@1 array mask))
   in map (fn r0 r1 => map age r0 r1) randomish
@@ -121,43 +121,43 @@ fun alchemy (r: int) (env: env): env =
 --   0 1 0 1 ....
 --   2 3 2 3 ....
 --   ...
-fun margMaskEven ((h,w): (int,int)): [h][w]marg_pos =
-  map (fn y => map (fn x => (x % 2) | ((y % 2) << 1)) (iota w)) (iota h)
+fun margMaskEven ((w,h): (int,int)): [w][h]marg_pos =
+  map (fn x => map (fn y => (x % 2) | ((y % 2) << 1)) (iota h)) (iota w)
 
-fun margMaskOdd ((h,w): (int,int)): [h][w]marg_pos =
-  map (fn r => map (3-) r) (margMaskEven (h,w))
+fun margMaskOdd ((w,h): (int,int)): [w][h]marg_pos =
+  map (fn r => map (3-) r) (margMaskEven (w,h))
 
 -- Given a Moore neighbourhood (3x3), find the Margolus neighbourhood
 -- (2x2) and encode it as a number, combined with the Margolus
 -- position for each cell
-fun margStencil (array: [h][w](element, marg_pos)): [h][w](env, marg_pos) =
-  map(fn y => map(fn x =>
-         let (me, marg_pos) = array[y,x]
+fun margStencil (array: [w][h](element, marg_pos)): [w][h](env, marg_pos) =
+  map(fn x => map(fn y =>
+         let (me, marg_pos) = array[x,y]
          let new =
            combine
            (if marg_pos == 0 then
               (me,
-               margGet array y     (x+1),
-               margGet array (y+1) x,
-               margGet array (y+1) (x-1))
+               margGet array (x+1)     y,
+               margGet array x     (y+1),
+               margGet array (x-1) (y+1))
             else if marg_pos == 1 then
-              (margGet array y     (x-1),
+              (margGet array (x-1)     y,
                me,
-               margGet array (y+1) (x-1),
-               margGet array (y+1) x)
+               margGet array (x-1) (y+1),
+               margGet array x     (y+1))
             else if marg_pos == 2 then
-              (margGet array (y-1) x,
-               margGet array (y-1) (x+1),
+              (margGet array x     (y-1),
+               margGet array (x+1) (y-1),
                me,
-               margGet array y     (x+1))
+               margGet array (x+1)     y)
             else
-              (margGet array (y-1) (x-1),
-               margGet array (y-1) x,
-               margGet array y     (x-1),
+              (margGet array (x-1) (y-1),
+               margGet array x     (y-1),
+               margGet array (x-1)     y,
                me))
          in (new, marg_pos))
-       (iota w)) (iota h)
+       (iota h)) (iota w)
 
-fun margGet (array: [h][w](element, marg_pos)) (y: int) (x: int): env =
+fun margGet (array: [w][h](element, marg_pos)) (x: int) (y: int): env =
   if y < 0 || y >= h || x < 0 || x >= w then nothing
-  else let (r, _) = unsafe array[y,x] in r
+  else let (r, _) = unsafe array[x,y] in r

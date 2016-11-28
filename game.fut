@@ -7,17 +7,17 @@ type game_state = (int,         -- generation
                    [][]element  -- state of the world
                   )
 
-entry new_game (h:int,w:int): game_state =
+entry new_game (w:int,h:int): game_state =
  (0,
-  margMaskEven (h,w), margMaskOdd (h,w),
-  replicate h (replicate w nothing))
+  margMaskEven (w,h), margMaskOdd (w,h),
+  replicate w (replicate h nothing))
 
-entry step_game(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
-                elems: [h][w]element): game_state =
+entry step_game(gen: int, cur_mask: [w][h]marg_pos, next_mask: [w][h]marg_pos,
+                elems: [w][h]element): game_state =
   (gen + 1, next_mask, cur_mask, step gen cur_mask elems)
 
-entry render(_: int, _: [h][w]marg_pos, _: [h][w]marg_pos, elems: [h][w]element): [w][h]int =
-  map (fn r => map elemColour r) (transpose elems)
+entry render(_: int, _: [w][h]marg_pos, _: [w][h]marg_pos, elems: [w][h]element): [w][h]int =
+  map (fn r => map elemColour r) elems
 
 fun elemColour (x: element): int =
   if      x == steam_water
@@ -56,19 +56,19 @@ fun elemColour (x: element): int =
                    red yellow
   else black -- handles 'nothing'
 
-entry add_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
-                  elems: [h][w]element) (pos: (int,int)) (r: int) (elem: element): game_state =
+entry add_element(gen: int, cur_mask: [w][h]marg_pos, next_mask: [w][h]marg_pos,
+                  elems: [w][h]element) (pos: (int,int)) (r: int) (elem: element): game_state =
   (gen, cur_mask, next_mask,
-  map (fn y => map (fn x => if elems[y,x] == nothing && int (dist (x,y) pos) < r
+  map (fn x => map (fn y => if elems[x,y] == nothing && int (dist (x,y) pos) < r
                             then elem
-                            else elems[y,x]) (iota w)) (iota h))
+                            else elems[x,y]) (iota h)) (iota w))
 
-entry clear_element(gen: int, cur_mask: [h][w]marg_pos, next_mask: [h][w]marg_pos,
-                   elems: [h][w]element) (pos: (int,int)) (r: int): game_state =
+entry clear_element(gen: int, cur_mask: [w][h]marg_pos, next_mask: [w][h]marg_pos,
+                   elems: [w][h]element) (pos: (int,int)) (r: int): game_state =
   (gen, cur_mask, next_mask,
-  map (fn y => map (fn x => if int (dist (x,y) pos) < r
+  map (fn x => map (fn y => if int (dist (x,y) pos) < r
                             then nothing
-                            else elems[y,x]) (iota w)) (iota h))
+                            else elems[x,y]) (iota h)) (iota w))
 
 
 fun dist (x0:int,y0:int) (x1:int,y1:int): f32 =

@@ -30,7 +30,7 @@ def showText(what, where):
     screen.blit(text, where)
 
 beet = game.game()
-beet_state = beet.new_game(height, width)
+beet_state = beet.new_game(width, height)
 
 # Initialise the list of insertable elements and their names.
 insertable = []
