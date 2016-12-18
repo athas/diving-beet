@@ -1,4 +1,4 @@
-FUTHARK_SRC=alchemy.fut game.fut gravity.fut step.fut world.fut
+FUTHARK_SRC=alchemy.fut game.fut step.fut world.fut
 
 all: game.py
 

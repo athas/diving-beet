@@ -1,30 +1,25 @@
-type element = u32
-type cell = u32
-type env = u32
+type element = u8
 type weight = u8
 type weight_env = u8
 
--- Position in a Margolus neighborhood; ranges from 0-3.
-type marg_pos = int
-
-val nothing: element = 0u32
-val steam_water: element = 1u32
-val steam_condensed: element = 2u32
-val oil: element = 6u32
-val water: element = 7u32
-val salt_water: element = 8u32
-val sand: element = 9u32
-val salt: element = 10u32
-val stone: element = 11u32
-val fire: element = 12u32
-val fire_end: element = 22u32
-val torch: element = 23u32
-val plant: element = 24u32
-val spout: element = 25u32
-val metal: element = 26u32
-val lava: element = 27u32
-val turnip: element = 28u32
-val wall: element = 29u32
+val nothing: element = 0u8
+val steam_water: element = 1u8
+val steam_condensed: element = 2u8
+val oil: element = 6u8
+val water: element = 7u8
+val salt_water: element = 8u8
+val sand: element = 9u8
+val salt: element = 10u8
+val stone: element = 11u8
+val fire: element = 12u8
+val fire_end: element = 22u8
+val torch: element = 23u8
+val plant: element = 24u8
+val spout: element = 25u8
+val metal: element = 26u8
+val lava: element = 27u8
+val turnip: element = 28u8
+val wall: element = 29u8
 
 val elems: []element = [ nothing
                        , steam_water
@@ -52,10 +47,8 @@ fun isWall (x: element): bool =
 fun isFire (x: element): bool =
   x >= fire && x <= fire_end
 
-fun isFluid (x: element): weight =
-  if x == steam_water || x == steam_condensed || x == oil || x == water || x == salt_water || x == lava
-  then 2u8
-  else 0u8
+fun isFluid (x: element): bool =
+  x == steam_water || x == steam_condensed || x == oil || x == water || x == salt_water || x == lava
 
 fun weight (x: element): weight =
   if x == nothing then 2u8
@@ -68,8 +61,8 @@ fun weight (x: element): weight =
 
 fun age (r: int) (x: element): element =
   if x == fire_end then nothing
-  else if isFire x then if r < 50 then x + 1u32 else x
+  else if isFire x then if r < 50 then x + 1u8 else x
   else if x == steam_water then if r < 1 then water else steam_water
   else if x == steam_condensed then if r < 5 then water else steam_condensed
-  else if x == turnip then unsafe elems[(r*num_elems) / 110]
+  else if x == turnip then unsafe elems[r%num_elems]
   else x
