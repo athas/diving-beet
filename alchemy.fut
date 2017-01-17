@@ -1,7 +1,7 @@
 include world
 
 -- The random parameter 'r' is used to decrease the frequency of some interactions.
-fun applyAlchemy (r: int) (x: element) (y: element): (element, element) =
+fun applyAlchemy (r: i32) (x: element) (y: element): (element, element) =
   -- water + salt = salt_water + nothing
   if      x == water && y == salt
   then (salt_water, nothing)

@@ -2,7 +2,7 @@ include world
 include alchemy
 
 -- Position in a Margolus neighborhood; ranges from 0-3.
-type marg_pos = int
+type marg_pos = i32
 
 -- A Margolus neighborhood.  We will just call these 'hood's, because
 -- it is more gangsta.
@@ -44,13 +44,13 @@ fun permuteHoodQuadrants (h: hood) ((ul,ur,dl,dr): (marg_pos, marg_pos, marg_pos
   hoodFromQuadrants (hoodQuadrant h ul) (hoodQuadrant h ur)
                     (hoodQuadrant h dl) (hoodQuadrant h dr)
 
-fun indexToHood (offset: int) (i: int): (int, int) =
+fun indexToHood (offset: i32) (i: i32): (i32, i32) =
   if offset == 0 then (i / 2, i % 2)
   else ((i+1) / 2, (i+1) % 2)
 
 -- Given a hood array at offset -1 or 0, return the element at index
 -- (x,y).  Out-of-bounds returns 'nothing'.
-fun hoodArrayIndex (offset: int) (elems: [w][h]hood) ((x,y): (int,int)): element =
+fun hoodArrayIndex (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
   -- First, figure out which hood (x,y) is in.
   let (hx,ix) = indexToHood offset x
   let (hy,iy) = indexToHood offset y
@@ -61,29 +61,29 @@ fun hoodArrayIndex (offset: int) (elems: [w][h]hood) ((x,y): (int,int)): element
      else hoodQuadrant (unsafe elems[hx,hy]) (ix+iy*2)
 
 -- From http://stackoverflow.com/a/12996028
-fun hash(x: int): int =
+fun hash(x: i32): i32 =
   let x = ((x >> 16) ^ x) * 0x45d9f3b
   let x = ((x >> 16) ^ x) * 0x45d9f3b
   let x = ((x >> 16) ^ x) in
   x
 
 -- An array with a "random" number for every hood.
-fun hoodRandoms ((w,h): (int,int)) ((lower,upper): (int,int)) (gen: int): [w][h]int =
+fun hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
   reshape (w,h)
-  (map (fn i => (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h)))
+  (map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h)))
 
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
-fun step (gen: int) (hoods: [w][h]hood): [w][h]hood =
+fun step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
   let randomish = hoodRandoms (w,h) (0,100) gen
-  let envs = map (fn randomish_r hoods_r => map alchemy randomish_r hoods_r)
+  let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
                  randomish hoods
-  in map (fn r0 r1 => map ageHood r0 r1) randomish
-     (map (fn r => map gravity r) envs)
+  in map (\r0 r1 -> map ageHood r0 r1) randomish
+     (map (\r -> map gravity r) envs)
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.
-fun ageHood (seed: int) (h: hood): hood =
+fun ageHood (seed: i32) (h: hood): hood =
   let (ul, ur, dl, dr) = hoodQuadrants h in
   hoodFromQuadrants (age (hash (seed^0) % 100) ul)
                     (age (hash (seed^1) % 100) ur)
@@ -91,7 +91,7 @@ fun ageHood (seed: int) (h: hood): hood =
                     (age (hash (seed^3) % 100) dr)
 
 -- Apply alchemy within a hood.
-fun alchemy (r: int) (h: hood): hood =
+fun alchemy (r: i32) (h: hood): hood =
   let (ul0, ur0, dl0, dr0) = hoodQuadrants h in
   if ul0 == ur0 && ur0 == dl0 && dl0 == dr0
   then h
@@ -111,9 +111,9 @@ fun gravity (h: hood): hood =
     if ((isFluid dl && dr == nothing) || (isFluid dr && dl == nothing)) &&
        isFluid ul && isFluid ur
     then (ul, ur, dr, dl)
-    else if isFluid ul && weight ur < weight ul && dl != nothing && dr != nothing && ! isWall dl && ! isWall dr
+    else if isFluid ul && weight ur < weight ul && dl != nothing && dr != nothing && !(isWall dl) && !(isWall dr)
     then (ur, ul, dl, dr)
-    else if isFluid ur && weight ul < weight ur && dl != nothing && dr != nothing && ! isWall dl && ! isWall dr
+    else if isFluid ur && weight ul < weight ur && dl != nothing && dr != nothing && !(isWall dl) && !(isWall dr)
     then (ur, ul, dr, dl)
     else if isFluid dl && weight ul < weight dl && weight ur < weight dl && weight dr < weight dl
     then (ul, ur, dr, dl)

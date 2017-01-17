@@ -16,7 +16,7 @@ fun unpackHood (ph: packed_hood): hood =
 
 -- Given a hood array at offset -1 or 0, return the element at index
 -- (x,y).  Out-of-bounds returns 'nothing'.
-fun packedWorldIndex (offset: int) (hoods: [w][h]packed_hood) ((x,y): (int,int)): element =
+fun packedWorldIndex (offset: i32) (hoods: [w][h]packed_hood) ((x,y): (i32,i32)): element =
   -- First, figure out which hood (x,y) is in.
   let (hx,ix) = indexToHood offset x
   let (hy,iy) = indexToHood offset y
@@ -27,11 +27,11 @@ fun packedWorldIndex (offset: int) (hoods: [w][h]packed_hood) ((x,y): (int,int))
      else hoodQuadrant (unsafe unpackHood hoods[hx,hy]) (ix+iy*2)
 
 fun packWorld (hoods: [w][h]hood): [w][h]packed_hood =
-  map (fn r => map packHood r) hoods
+  map (\r -> map packHood r) hoods
 
-fun shiftHoods (offset: int) (hoods: [w][h]packed_hood): [w][h]hood =
+fun shiftHoods (offset: i32) (hoods: [w][h]packed_hood): [w][h]hood =
   let new_offset = if offset == 0 then -1 else 0
-  in map (fn x => map (fn y =>
+  in map (\x -> map (\y ->
             let ul = packedWorldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
             let dl = packedWorldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+1)
             let ur = packedWorldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+0)
@@ -39,38 +39,38 @@ fun shiftHoods (offset: int) (hoods: [w][h]packed_hood): [w][h]hood =
             in hoodFromQuadrants ul ur dl dr)
             (iota h)) (iota w)
 
-type game_state = (int,              -- generation
+type game_state = (i32,              -- generation
                    [][]packed_hood,  -- world data
-                   int,              -- world width
-                   int               -- world height
+                   i32,              -- world width
+                   i32               -- world height
                   )
 
-fun divRoundingUp (x: int) (y: int): int =
+fun divRoundingUp (x: i32) (y: i32): i32 =
   (x + y - 1) / y
 
-entry new_game (ww:int,wh:int): game_state =
+entry new_game (ww:i32,wh:i32): game_state =
   new_game_with (ww,wh) nothing
 
-entry new_game_random (ww:int,wh:int): game_state =
+entry new_game_random (ww:i32,wh:i32): game_state =
  new_game_with (ww,wh) turnip
 
-fun new_game_with (ww:int,wh:int) (e: element): game_state =
+fun new_game_with (ww:i32,wh:i32) (e: element): game_state =
  let w = divRoundingUp ww 2
  let h = divRoundingUp wh 2
  in (0,
      replicate w (replicate h (packHood (hoodFromQuadrants e e e e))),
      ww, wh)
 
-entry step_game(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int): game_state =
+entry step_game(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): game_state =
   let hoods' = step (gen+1) (shiftHoods (gen%2) hoods)
   in (gen+1, packWorld hoods', ww, wh)
 
-entry render(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int): [ww][wh]int =
+entry render(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): [ww][wh]i32 =
   let offset = gen % 2
-  in map (fn x => map (fn y => elemColour (packedWorldIndex offset hoods (x,y)))
+  in map (\x -> map (\y -> elemColour (packedWorldIndex offset hoods (x,y)))
                       (iota wh)) (iota ww)
 
-fun elemColour (x: element): int =
+fun elemColour (x: element): i32 =
   if      x == steam_water
   then bright (light (light (light blue)))
   else if x == steam_condensed
@@ -107,11 +107,11 @@ fun elemColour (x: element): int =
                    red yellow
   else black -- handles 'nothing'
 
-entry add_element(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int)
-                 (pos: (int,int)) (r: int) (elem: element): game_state =
+entry add_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+                 (pos: (i32,i32)) (r: i32) (elem: element): game_state =
   let offset = gen % 2
   let hoods' =
-    map (fn x => map (fn y =>
+    map (\x -> map (\y ->
         let (ul, ur, dl, dr) = hoodQuadrants (unpackHood hoods[x,y])
         let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
         let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
@@ -125,11 +125,11 @@ entry add_element(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int)
         (iota h)) (iota w)
   in (gen, hoods', ww, wh)
 
-entry clear_element(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int)
-                   (pos: (int,int)) (r: int): game_state =
+entry clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+                   (pos: (i32,i32)) (r: i32): game_state =
   let offset = gen % 2
   let hoods' =
-    map (fn x => map (fn y =>
+    map (\x -> map (\y ->
         let (ul, ur, dl, dr) = hoodQuadrants (unpackHood hoods[x,y])
         let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
         let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
@@ -144,7 +144,7 @@ entry clear_element(gen: int, hoods: [w][h]packed_hood, ww: int, wh: int)
   in (gen, hoods', ww, wh)
 
 
-fun dist (x0:int,y0:int) (x1:int,y1:int): f32 =
+fun dist (x0:i32,y0:i32) (x1:i32,y1:i32): f32 =
   sqrt32 (f32 ((x0-x1)**2 + (y0-y1)**2))
 
 entry insertable_elements(): []element =
@@ -163,7 +163,7 @@ entry insertable_elements(): []element =
  , turnip
  , wall ]
 
-entry element_name(x: element): []int =
+entry element_name(x: element): []i32 =
   if x == nothing then "nothing"
   else if x == steam_water then "steam"
   else if x == steam_condensed then "condensate"
@@ -183,6 +183,6 @@ entry element_name(x: element): []int =
   else if x == wall then "wall"
   else "unnamed element"
 
-entry element_at (gen: int, hoods: [w][h]packed_hood, _: int, _: int) (x: int, y: int): element =
+entry element_at (gen: i32, hoods: [w][h]packed_hood, _: i32, _: i32) (x: i32, y: i32): element =
   let offset = gen % 2
   in packedWorldIndex offset hoods (x,y)

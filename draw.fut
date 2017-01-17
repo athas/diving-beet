@@ -1,15 +1,15 @@
 default (f32)
 
 -- RGB, stored in least significant three bytes.
-type colour = int
+type colour = i32
 
 fun clampChannel (x: f32): f32 =
   if x < 0f32 then 0f32 else if x > 1f32 then 1f32 else x
 
 fun mk_colour (r: f32) (g: f32) (b: f32): colour =
-  (int (clampChannel r * 255f32) << 16) |
-  (int (clampChannel g * 255f32) << 8)  |
-  (int (clampChannel b * 255f32))
+  (i32 (clampChannel r * 255f32) << 16) |
+  (i32 (clampChannel g * 255f32) << 8)  |
+  (i32 (clampChannel b * 255f32))
 
 -- Normalise a color to the value of its largest RGB component.
 fun normalised_colour (r: f32) (g: f32) (b: f32): colour =

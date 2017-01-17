@@ -39,7 +39,7 @@ val elems: []element = [ nothing
                        , lava
                        , turnip ]
 
-val num_elems: int = (shape(elems))[0]
+val num_elems: i32 = (shape(elems))[0]
 
 fun isWall (x: element): bool =
   x == torch || x == plant || x == spout || x == metal || x == wall
@@ -59,7 +59,7 @@ fun weight (x: element): weight =
   else if isFire x then 0u8
   else u8 x
 
-fun age (r: int) (x: element): element =
+fun age (r: i32) (x: element): element =
   if x == fire_end then nothing
   else if isFire x then if r < 50 then x + 1u8 else x
   else if x == steam_water then if r < 1 then water else steam_water
