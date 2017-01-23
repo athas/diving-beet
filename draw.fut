@@ -1,3 +1,5 @@
+include futlib.numeric
+
 default (f32)
 
 -- RGB, stored in least significant three bytes.
@@ -45,9 +47,9 @@ fun mix_colours (m1: f32) (m2: f32) (c1: colour) (c2: colour): colour =
   let b1s = b1 * b1
   let b2s = b2 * b2
 
-  in mk_colour (sqrt32 (m1' * r1s + m2' * r2s))
-               (sqrt32 (m1' * g1s + m2' * g2s))
-               (sqrt32 (m1' * b1s + m2' * b2s))
+  in mk_colour (F32.sqrt (m1' * r1s + m2' * r2s))
+               (F32.sqrt (m1' * g1s + m2' * g2s))
+               (F32.sqrt (m1' * b1s + m2' * b2s))
 
 fun bright (c: colour): colour =
   let (r,g,b) = rgb_of_colour c

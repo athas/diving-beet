@@ -1,3 +1,5 @@
+include futlib.numeric
+
 include step
 include draw
 
@@ -145,7 +147,7 @@ entry clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
 
 
 fun dist (x0:i32,y0:i32) (x1:i32,y1:i32): f32 =
-  sqrt32 (f32 ((x0-x1)**2 + (y0-y1)**2))
+  F32.sqrt (f32 ((x0-x1)**2 + (y0-y1)**2))
 
 entry insertable_elements(): []element =
  [ oil
