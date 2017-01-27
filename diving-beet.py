@@ -6,6 +6,8 @@ import pygame
 import time
 import sys
 
+beet = game.game(interactive=True)
+
 fullscreen = False
 
 if fullscreen:
@@ -29,7 +31,6 @@ def showText(what, where):
     text = font.render(what, 1, (255, 255, 255))
     screen.blit(text, where)
 
-beet = game.game()
 beet_state = beet.new_game(width, height)
 
 # Initialise the list of insertable elements and their names.
