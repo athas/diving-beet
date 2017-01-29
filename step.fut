@@ -1,5 +1,5 @@
-include world
-include alchemy
+import "world"
+import "alchemy"
 
 -- Position in a Margolus neighborhood; ranges from 0-3.
 type marg_pos = i32

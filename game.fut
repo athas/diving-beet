@@ -1,7 +1,7 @@
-include futlib.numeric
+import "futlib/numeric"
 
-include step
-include draw
+import "step"
+import "draw"
 
 -- A hood packed into a single scalar value.
 type packed_hood = u32

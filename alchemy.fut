@@ -1,4 +1,4 @@
-include world
+import "world"
 
 -- The random parameter 'r' is used to decrease the frequency of some interactions.
 fun applyAlchemy (r: i32) (x: element) (y: element): (element, element) =

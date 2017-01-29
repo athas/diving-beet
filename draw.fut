@@ -1,4 +1,4 @@
-include futlib.numeric
+import "futlib/numeric"
 
 default (f32)
 
