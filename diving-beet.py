@@ -49,6 +49,7 @@ for i in range(num_insertable):
         break
 
 modify_radius = 5
+old_pos = None
 
 while True:
     start = time.time()
@@ -86,9 +87,24 @@ while True:
 
     if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
         # insert the selected element here.
-        args = beet_state + pygame.mouse.get_pos() + (modify_radius, insertable[selection][1])
+
+        new_pos = pygame.mouse.get_pos()
+        if old_pos == None:
+            old_pos = new_pos
+
+        args = beet_state + old_pos + new_pos + (modify_radius, insertable[selection][1])
         beet_state = beet.add_element(*args)
-    if pygame.mouse.get_pressed()[2] and pygame.mouse.get_pos() != None:
+        old_pos = new_pos
+
+    elif pygame.mouse.get_pressed()[2] and pygame.mouse.get_pos() != None:
         # remove any element element here.
-        args = beet_state + pygame.mouse.get_pos() + (modify_radius,)
+
+        new_pos = pygame.mouse.get_pos()
+        if old_pos == None:
+            old_pos = new_pos
+
+        args = beet_state + old_pos + new_pos + (modify_radius,)
         beet_state = beet.clear_element(*args)
+        old_pos = new_pos
+    else:
+        old_pos = None

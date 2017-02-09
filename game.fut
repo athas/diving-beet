@@ -1,7 +1,7 @@
 import "futlib/numeric"
+import "futlib/colour"
 
 import "step"
-import "draw"
 
 -- A hood packed into a single scalar value.
 type packed_hood = u32
@@ -67,6 +67,8 @@ entry step_game(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): game_stat
   let hoods' = step (gen+1) (shiftHoods (gen%2) hoods)
   in (gen+1, packWorld hoods', ww, wh)
 
+open argb
+
 entry render(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): [ww][wh]i32 =
   let offset = gen % 2
   in map (\x -> map (\y -> elemColour (packedWorldIndex offset hoods (x,y)))
@@ -86,9 +88,9 @@ fun elemColour (x: element): i32 =
   else if x == sand
   then dim yellow
   else if x == salt
-  then grayN 0.95f32
+  then gray 0.95f32
   else if x == stone
-  then grayN 0.7f32
+  then gray 0.7f32
   else if x == torch
   then bright orange
   else if x == plant
@@ -96,21 +98,20 @@ fun elemColour (x: element): i32 =
   else if x == spout
   then blue
   else if x == metal
-  then mix_colours 0.2f32 0.8f32 blue (grayN 0.5f32)
+  then mix 0.2f32 blue 0.8f32 (gray 0.5f32)
   else if x == lava
   then bright red
   else if x == turnip
   then violet
   else if x == wall
-  then grayN 0.4f32
+  then gray 0.4f32
   else if isFire x
-  then mix_colours (f32 (x - fire))
-                   (f32 (fire_end - x))
-                   red yellow
+  then mix (f32 (x - fire))     red
+           (f32 (fire_end - x)) yellow
   else black -- handles 'nothing'
 
 entry add_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
-                 (pos: (i32,i32)) (r: i32) (elem: element): game_state =
+                 (from: (i32,i32)) (to: (i32,i32)) (r: i32) (elem: element): game_state =
   let offset = gen % 2
   let hoods' =
     map (\x -> map (\y ->
@@ -120,15 +121,15 @@ entry add_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
         let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
         let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
         in packHood (hoodFromQuadrants
-                     (if dist ul_p pos < f32 r && ul == nothing then elem else ul)
-                     (if dist ur_p pos < f32 r && ur == nothing then elem else ur)
-                     (if dist dl_p pos < f32 r && dl == nothing then elem else dl)
-                     (if dist dr_p pos < f32 r && dr == nothing then elem else dr)))
+                     (if line_dist ul_p from to < f32 r && ul == nothing then elem else ul)
+                     (if line_dist ur_p from to < f32 r && ur == nothing then elem else ur)
+                     (if line_dist dl_p from to < f32 r && dl == nothing then elem else dl)
+                     (if line_dist dr_p from to < f32 r && dr == nothing then elem else dr)))
         (iota h)) (iota w)
   in (gen, hoods', ww, wh)
 
 entry clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
-                   (pos: (i32,i32)) (r: i32): game_state =
+                   (from: (i32,i32)) (to: (i32,i32)) (r: i32): game_state =
   let offset = gen % 2
   let hoods' =
     map (\x -> map (\y ->
@@ -138,16 +139,32 @@ entry clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
         let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
         let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
         in packHood (hoodFromQuadrants
-                     (if dist ul_p pos < f32 r then nothing else ul)
-                     (if dist ur_p pos < f32 r then nothing else ur)
-                     (if dist dl_p pos < f32 r then nothing else dl)
-                     (if dist dr_p pos < f32 r then nothing else dr)))
+                     (if line_dist ul_p from to < f32 r then nothing else ul)
+                     (if line_dist ur_p from to < f32 r then nothing else ur)
+                     (if line_dist dl_p from to < f32 r then nothing else dl)
+                     (if line_dist dr_p from to < f32 r then nothing else dr)))
         (iota h)) (iota w)
   in (gen, hoods', ww, wh)
 
+fun line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
+  f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
 
-fun dist (x0:i32,y0:i32) (x1:i32,y1:i32): f32 =
-  F32.sqrt (f32 ((x0-x1)**2 + (y0-y1)**2))
+fun f32p (x:i32,y:i32): (f32,f32) =
+  (f32 x, f32 y)
+
+fun line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
+  let l2 = dist_sq v w
+  in if l2 == 0f32 then dist_sq p v
+     else let t = ((#0 p - #0 v) * (#0 w - #0 v) + (#1 p - #1 v) * (#1 w - #1 v)) / l2
+          let t = if t > 1f32 then 1f32
+                  else if t < 0f32 then 0f32
+                  else t
+          in dist_sq p
+                     ((#0 v) + t * (#0 w - #0 v),
+                      (#1 v) + t * (#1 w - #1 v))
+
+fun dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
+  (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
 
 entry insertable_elements(): []element =
  [ oil
