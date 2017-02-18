@@ -53,8 +53,8 @@ old_pos = None
 
 while True:
     start = time.time()
-    beet_state = beet.step_game(*beet_state)
-    frame = beet.render(*beet_state).get()
+    beet_state = beet.step(beet_state)
+    frame = beet.render(beet_state).get()
     end = time.time()
     futhark_time = (end-start)*1000
 
@@ -92,7 +92,7 @@ while True:
         if old_pos == None:
             old_pos = new_pos
 
-        args = beet_state + old_pos + new_pos + (modify_radius, insertable[selection][1])
+        args = [beet_state] + list(old_pos) + list(new_pos) + [modify_radius, insertable[selection][1]]
         beet_state = beet.add_element(*args)
         old_pos = new_pos
 
@@ -103,7 +103,7 @@ while True:
         if old_pos == None:
             old_pos = new_pos
 
-        args = beet_state + old_pos + new_pos + (modify_radius,)
+        args = [beet_state] + list(old_pos) + list(new_pos) + [modify_radius]
         beet_state = beet.clear_element(*args)
         old_pos = new_pos
     else:

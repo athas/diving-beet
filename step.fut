@@ -74,7 +74,7 @@ fun hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]
 
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
-fun step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
+fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
   let randomish = hoodRandoms (w,h) (0,100) gen
   let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
                  randomish hoods
