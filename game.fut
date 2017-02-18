@@ -1,4 +1,4 @@
-import "futlib/numeric"
+import "futlib/math"
 import "futlib/colour"
 
 import "step"
