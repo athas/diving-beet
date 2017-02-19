@@ -75,7 +75,7 @@ fun hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
 fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
-  let randomish = hoodRandoms (w,h) (0,100) gen
+  let randomish = hoodRandoms (w,h) (0,10000) gen
   let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
                  randomish hoods
   in map (\r0 r1 -> map ageHood r0 r1) randomish
@@ -85,10 +85,10 @@ fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
 -- generate four new random numbers,which are then used for the aging.
 fun ageHood (seed: i32) (h: hood): hood =
   let (ul, ur, dl, dr) = hoodQuadrants h in
-  hoodFromQuadrants (age (hash (seed^0) % 100) ul)
-                    (age (hash (seed^1) % 100) ur)
-                    (age (hash (seed^2) % 100) dl)
-                    (age (hash (seed^3) % 100) dr)
+  hoodFromQuadrants (age (hash (seed^0) % 10000) ul)
+                    (age (hash (seed^1) % 10000) ur)
+                    (age (hash (seed^2) % 10000) dl)
+                    (age (hash (seed^3) % 10000) dr)
 
 -- Apply alchemy within a hood.
 fun alchemy (r: i32) (h: hood): hood =

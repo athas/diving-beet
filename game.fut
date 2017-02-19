@@ -118,6 +118,8 @@ module game: {
     then mix 0.2f32 blue 0.8f32 (gray 0.5f32)
     else if x == lava
     then bright red
+    else if x == napalm
+    then dark orange
     else if x == turnip
     then violet
     else if x == wall
@@ -196,6 +198,7 @@ module game: {
     , spout
     , metal
     , lava
+    , napalm
     , turnip
     , wall ]
 
@@ -215,6 +218,7 @@ module game: {
     else if x == spout then "spout"
     else if x == metal then "metal"
     else if x == lava then "lava"
+    else if x == napalm then "napalm"
     else if x == turnip then "random"
     else if x == wall then "wall"
     else "unnamed element"
