@@ -11,14 +11,14 @@ module game: {
   val new_game_random: (i32,i32) -> game_state
 
   val step: game_state -> game_state
-  val render: game_state -> [][]i32
+  val render: game_state -> (f32, f32) -> f32 -> (i32, i32) -> [][]i32
 
-  val add_element: game_state -> (i32,i32) -> (i32,i32) -> i32 -> element -> game_state
-  val clear_element: game_state -> (i32,i32) -> (i32,i32) -> i32 -> game_state
+  val add_element: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> (i32,i32) -> i32 -> element -> game_state
+  val clear_element: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> (i32,i32) -> i32 -> game_state
 
   val insertable_elements: () -> []element
   val element_name: element -> []i32
-  val element_at: game_state -> (i32,i32) -> element
+  val element_at: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> element
 } = {
   -- A hood packed into a single scalar value.
   type packed_hood = u32
@@ -28,10 +28,7 @@ module game: {
     in ((u32(ul)<<24u32) | (u32(ur)<<16u32) | (u32(dl)<<8u32) | u32(dr))
 
   fun unpackHood (ph: packed_hood): hood =
-    hoodFromQuadrants (u8(ph>>24u32))
-  (u8(ph>>16u32))
-  (u8(ph>>8u32))
-  (u8(ph>>0u32))
+    hoodFromQuadrants (u8(ph>>24u32)) (u8(ph>>16u32)) (u8(ph>>8u32)) (u8(ph>>0u32))
 
   -- Given a hood array at offset -1 or 0, return the element at index
   -- (x,y).  Out-of-bounds returns 'nothing'.
@@ -86,10 +83,26 @@ module game: {
 
   open argb
 
-  fun render(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): [ww][wh]i32 =
+  fun screen_point_to_world_point ((ul_x, ul_y): (f32,f32)) (s: f32)
+                                  ((sw,sh): (i32,i32)) ((ww,wh): (i32,i32))
+                                  ((x,y): (i32,i32)) =
+    let x' = i32 ((ul_x + s * (f32 x / f32 sw)) * f32 ww)
+    let y' = i32 ((ul_y + s * (f32 y / f32 sh)) * f32 wh)
+    in (x', y')
+
+  fun render (gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
     let offset = gen % 2
-    in map (\x -> map (\y -> elemColour (packedWorldIndex offset hoods (x,y)))
-            (iota wh)) (iota ww)
+    let particle_pixel (x: i32) (y: i32) =
+      elemColour (packedWorldIndex offset hoods (x,y))
+    let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
+    let ww = (shape world_pixels)[0]
+    let wh = (shape world_pixels)[1]
+    let screen_pixel (x: i32) (y: i32) =
+      (let (x',y') = screen_point_to_world_point ul s (sw,sh) (ww,wh) (x,y)
+       in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
+          then unsafe world_pixels[x', y']
+          else 0xFFFFFFFF)
+    in map (\x -> map (screen_pixel x) (iota sh)) (iota sw)
 
   fun elemColour (x: element): i32 =
     if      x == steam_water
@@ -130,7 +143,10 @@ module game: {
     else black -- handles 'nothing'
 
   fun add_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
-                   (from: (i32,i32)) (to: (i32,i32)) (r: i32) (elem: element): game_state =
+                 (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
+                 (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32) (elem: element): game_state =
+    let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
+    let to   = screen_point_to_world_point ul s (sw,sh) (ww,wh) to_rel
     let offset = gen % 2
     let hoods' =
       map (\x -> map (\y ->
@@ -148,7 +164,10 @@ module game: {
     in (gen, hoods', ww, wh)
 
   fun clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
-                     (from: (i32,i32)) (to: (i32,i32)) (r: i32): game_state =
+                   (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
+                   (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32): game_state =
+    let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
+    let to   = screen_point_to_world_point ul s (sw,sh) (ww,wh) to_rel
     let offset = gen % 2
     let hoods' =
       map (\x -> map (\y ->
@@ -174,13 +193,13 @@ module game: {
   fun line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
     let l2 = dist_sq v w
     in if l2 == 0f32 then dist_sq p v
-       else let t = ((#0 p - #0 v) * (#0 w - #0 v) + (#1 p - #1 v) * (#1 w - #1 v)) / l2
+       else let t = ((#1 p - #1 v) * (#1 w - #1 v) + (#2 p - #2 v) * (#2 w - #2 v)) / l2
             let t = if t > 1f32 then 1f32
                     else if t < 0f32 then 0f32
                     else t
             in dist_sq p
-  ((#0 v) + t * (#0 w - #0 v),
-   (#1 v) + t * (#1 w - #1 v))
+  ((#1 v) + t * (#1 w - #1 v),
+   (#2 v) + t * (#2 w - #2 v))
 
   fun dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
     (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
@@ -223,10 +242,11 @@ module game: {
     else if x == wall then "wall"
     else "unnamed element"
 
-  fun element_at (gen: i32, hoods: [w][h]packed_hood, _: i32, _: i32) (x: i32, y: i32): element =
+  fun element_at (gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+                 (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)) (rel_pos: (i32,i32)): element =
+    let (x,y) = screen_point_to_world_point ul s (sw,sh) (ww,wh) rel_pos
     let offset = gen % 2
     in packedWorldIndex offset hoods (x,y)
-
 }
 
 -- I wish this boilerplate could be written a nicer way.
@@ -234,13 +254,14 @@ entry new_game (w: i32) (h: i32) = game.new_game (w,h)
 entry new_game_random (w: i32) (h: i32) = game.new_game_random (w,h)
 
 entry step (a: game.game_state) = game.step a
-entry render (a: game.game_state) = game.render a
+entry render (a: game.game_state) (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) = game.render a (ul_x, ul_y) s (sw,sh)
 
-entry add_element (a: game.game_state) (b1: i32) (b2: i32) (c1: i32) (c2: i32) (d: i32) (e: element) =
-  game.add_element a (b1,b2) (c1,c2) d e
-entry clear_element (a: game.game_state) (b1: i32) (b2: i32) (c1: i32) (c2: i32) (d: i32) =
-  game.clear_element a (b1,b2) (c1,c2) d
+entry add_element (a: game.game_state) (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) (b1: i32) (b2: i32) (c1: i32) (c2: i32) (d: i32) (e: element) =
+  game.add_element a (ul_x,ul_y) s (sw,sh) (b1,b2) (c1,c2) d e
+entry clear_element (a: game.game_state) (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) (b1: i32) (b2: i32) (c1: i32) (c2: i32) (d: i32) =
+  game.clear_element a (ul_x,ul_y) s (sw,sh) (b1,b2) (c1,c2) d
 
 entry insertable_elements() = game.insertable_elements ()
 entry element_name(a: element) = game.element_name a
-entry element_at (a: game.game_state) (b1: i32) (b2: i32) = game.element_at a (b1,b2)
+entry element_at (a: game.game_state) (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) (b1: i32) (b2: i32) =
+ game.element_at a (ul_x,ul_y) s (sw,sh) (b1,b2)
