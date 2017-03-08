@@ -25,32 +25,13 @@ fun hoodQuadrant (h: hood) (i: marg_pos): element =
   else if i == 2 then dl0
   else                dr0
 
--- Return the requested quadrant from the given hood.
-fun setHoodQuadrant (h: hood) (i: marg_pos) (x: element): hood =
-  let (ul0, ur0, dl0, dr0) = hoodQuadrants h in
-  if      i == 0 then hoodFromQuadrants x ur0 dl0 dr0
-  else if i == 1 then hoodFromQuadrants ul0 x dl0 dr0
-  else if i == 2 then hoodFromQuadrants ul0 ur0 x dr0
-  else                hoodFromQuadrants ul0 ur0 dl0 x
-
--- Swap to quadrants in a hood.
-fun swapHoodQuadrants (h: hood) (i: marg_pos) (j: marg_pos): hood =
-  let x = hoodQuadrant h i
-  let y = hoodQuadrant h j
-  in setHoodQuadrant (setHoodQuadrant h i y) j x
-
--- Make sure the permutation has no duplicate entries.
-fun permuteHoodQuadrants (h: hood) ((ul,ur,dl,dr): (marg_pos, marg_pos, marg_pos, marg_pos)): hood =
-  hoodFromQuadrants (hoodQuadrant h ul) (hoodQuadrant h ur)
-                    (hoodQuadrant h dl) (hoodQuadrant h dr)
-
 fun indexToHood (offset: i32) (i: i32): (i32, i32) =
   if offset == 0 then (i / 2, i % 2)
   else ((i+1) / 2, (i+1) % 2)
 
 -- Given a hood array at offset -1 or 0, return the element at index
 -- (x,y).  Out-of-bounds returns 'nothing'.
-fun hoodArrayIndex (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
+fun worldIndex (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
   -- First, figure out which hood (x,y) is in.
   let (hx,ix) = indexToHood offset x
   let (hy,iy) = indexToHood offset y

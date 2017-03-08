@@ -21,16 +21,6 @@ module game: {
   val element_at: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> element
 } = {
 
-  fun worldIndex (offset: i32) (hoods: [w][h]hood) ((x,y): (i32,i32)): element =
-    -- First, figure out which hood (x,y) is in.
-    let (hx,ix) = indexToHood offset x
-    let (hy,iy) = indexToHood offset y
-
-    -- Then read if we are in-bounds.
-    in if hx < 0 || hx >= w || hy < 0 || hy >= h
-       then nothing
-       else hoodQuadrant (unsafe hoods[hx,hy]) (ix+iy*2)
-
   fun shiftHoods (offset: i32) (hoods: [w][h]hood): [w][h]hood =
     let new_offset = if offset == 0 then -1 else 0
     in map (\x -> map (\y ->
