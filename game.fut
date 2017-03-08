@@ -20,19 +20,8 @@ module game: {
   val element_name: element -> []i32
   val element_at: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> element
 } = {
-  -- A hood packed into a single scalar value.
-  type packed_hood = u32
 
-  fun packHood (h: hood): packed_hood =
-    let (ul, ur, dl, dr) = hoodQuadrants h
-    in ((u32(ul)<<24u32) | (u32(ur)<<16u32) | (u32(dl)<<8u32) | u32(dr))
-
-  fun unpackHood (ph: packed_hood): hood =
-    hoodFromQuadrants (u8(ph>>24u32)) (u8(ph>>16u32)) (u8(ph>>8u32)) (u8(ph>>0u32))
-
-  -- Given a hood array at offset -1 or 0, return the element at index
-  -- (x,y).  Out-of-bounds returns 'nothing'.
-  fun packedWorldIndex (offset: i32) (hoods: [w][h]packed_hood) ((x,y): (i32,i32)): element =
+  fun worldIndex (offset: i32) (hoods: [w][h]hood) ((x,y): (i32,i32)): element =
     -- First, figure out which hood (x,y) is in.
     let (hx,ix) = indexToHood offset x
     let (hy,iy) = indexToHood offset y
@@ -40,25 +29,22 @@ module game: {
     -- Then read if we are in-bounds.
     in if hx < 0 || hx >= w || hy < 0 || hy >= h
        then nothing
-       else hoodQuadrant (unsafe unpackHood hoods[hx,hy]) (ix+iy*2)
+       else hoodQuadrant (unsafe hoods[hx,hy]) (ix+iy*2)
 
-  fun packWorld (hoods: [w][h]hood): [w][h]packed_hood =
-    map (\r -> map packHood r) hoods
-
-  fun shiftHoods (offset: i32) (hoods: [w][h]packed_hood): [w][h]hood =
+  fun shiftHoods (offset: i32) (hoods: [w][h]hood): [w][h]hood =
     let new_offset = if offset == 0 then -1 else 0
     in map (\x -> map (\y ->
-                       let ul = packedWorldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
-                       let dl = packedWorldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+1)
-                       let ur = packedWorldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+0)
-                       let dr = packedWorldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+1)
+                       let ul = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
+                       let dl = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+1)
+                       let ur = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+0)
+                       let dr = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+1)
                        in hoodFromQuadrants ul ur dl dr)
             (iota h)) (iota w)
 
-  type game_state = (i32,              -- generation
-                     [][]packed_hood,  -- world data
-                     i32,              -- world width
-                     i32               -- world height
+  type game_state = (i32,       -- generation
+                     [][]hood,  -- world data
+                     i32,       -- world width
+                     i32        -- world height
                     )
 
   fun divRoundingUp (x: i32) (y: i32): i32 =
@@ -74,12 +60,12 @@ module game: {
     let w = divRoundingUp ww 2
     let h = divRoundingUp wh 2
     in (0,
-        replicate w (replicate h (packHood (hoodFromQuadrants e e e e))),
+        replicate w (replicate h (hoodFromQuadrants e e e e)),
         ww, wh)
 
-  fun step(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32): game_state =
+  fun step(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32): game_state =
     let hoods' = one_step (gen+1) (shiftHoods (gen%2) hoods)
-    in (gen+1, packWorld hoods', ww, wh)
+    in (gen+1, hoods', ww, wh)
 
   open argb
 
@@ -90,10 +76,10 @@ module game: {
     let y' = i32 ((ul_y + s * (f32 y / f32 sh)) * f32 wh)
     in (x', y')
 
-  fun render (gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
+  fun render (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
     let offset = gen % 2
     let particle_pixel (x: i32) (y: i32) =
-      elemColour (packedWorldIndex offset hoods (x,y))
+      elemColour (worldIndex offset hoods (x,y))
     let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
     let ww = (shape world_pixels)[0]
     let wh = (shape world_pixels)[1]
@@ -142,7 +128,7 @@ module game: {
   (f32 (fire_end - x)) yellow
     else black -- handles 'nothing'
 
-  fun add_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+  fun add_element(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
                  (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
                  (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32) (elem: element): game_state =
     let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
@@ -150,20 +136,20 @@ module game: {
     let offset = gen % 2
     let hoods' =
       map (\x -> map (\y ->
-                      let (ul, ur, dl, dr) = hoodQuadrants (unpackHood hoods[x,y])
+                      let (ul, ur, dl, dr) = hoodQuadrants hoods[x,y]
                       let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
                       let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
                       let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
                       let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
-                      in packHood (hoodFromQuadrants
-                                   (if line_dist ul_p from to < f32 r && ul == nothing then elem else ul)
-                                   (if line_dist ur_p from to < f32 r && ur == nothing then elem else ur)
-                                   (if line_dist dl_p from to < f32 r && dl == nothing then elem else dl)
-                                   (if line_dist dr_p from to < f32 r && dr == nothing then elem else dr)))
+                      in hoodFromQuadrants
+                         (if line_dist ul_p from to < f32 r && ul == nothing then elem else ul)
+                         (if line_dist ur_p from to < f32 r && ur == nothing then elem else ur)
+                         (if line_dist dl_p from to < f32 r && dl == nothing then elem else dl)
+                         (if line_dist dr_p from to < f32 r && dr == nothing then elem else dr))
            (iota h)) (iota w)
     in (gen, hoods', ww, wh)
 
-  fun clear_element(gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+  fun clear_element(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
                    (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
                    (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32): game_state =
     let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
@@ -171,16 +157,16 @@ module game: {
     let offset = gen % 2
     let hoods' =
       map (\x -> map (\y ->
-                      let (ul, ur, dl, dr) = hoodQuadrants (unpackHood hoods[x,y])
+                      let (ul, ur, dl, dr) = hoodQuadrants hoods[x,y]
                       let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
                       let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
                       let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
                       let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
-                      in packHood (hoodFromQuadrants
-                                   (if line_dist ul_p from to < f32 r then nothing else ul)
-                                   (if line_dist ur_p from to < f32 r then nothing else ur)
-                                   (if line_dist dl_p from to < f32 r then nothing else dl)
-                                   (if line_dist dr_p from to < f32 r then nothing else dr)))
+                      in hoodFromQuadrants
+                         (if line_dist ul_p from to < f32 r then nothing else ul)
+                         (if line_dist ur_p from to < f32 r then nothing else ur)
+                         (if line_dist dl_p from to < f32 r then nothing else dl)
+                         (if line_dist dr_p from to < f32 r then nothing else dr))
            (iota h)) (iota w)
     in (gen, hoods', ww, wh)
 
@@ -242,11 +228,11 @@ module game: {
     else if x == wall then "wall"
     else "unnamed element"
 
-  fun element_at (gen: i32, hoods: [w][h]packed_hood, ww: i32, wh: i32)
+  fun element_at (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
                  (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)) (rel_pos: (i32,i32)): element =
     let (x,y) = screen_point_to_world_point ul s (sw,sh) (ww,wh) rel_pos
     let offset = gen % 2
-    in packedWorldIndex offset hoods (x,y)
+    in worldIndex offset hoods (x,y)
 }
 
 -- I wish this boilerplate could be written a nicer way.
