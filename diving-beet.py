@@ -112,9 +112,9 @@ while True:
             if event.button == 5:
                 modify_radius = max(modify_radius - 1, 1)
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_PAGEUP:
+            if event.key == pygame.K_PAGEDOWN:
                 selection = (selection + 1) % num_insertable
-            elif event.key == pygame.K_PAGEDOWN:
+            elif event.key == pygame.K_PAGEUP:
                 selection = (selection - 1) % num_insertable
             elif event.key == pygame.K_LEFT:
                 ul_x -= 0.01
