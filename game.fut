@@ -40,18 +40,18 @@ module game: {
   fun divRoundingUp (x: i32) (y: i32): i32 =
     (x + y - 1) / y
 
-  fun new_game (ww:i32,wh:i32): game_state =
-    new_game_with (ww,wh) nothing
-
-  fun new_game_random (ww:i32,wh:i32): game_state =
-    new_game_with (ww,wh) turnip
-
   fun new_game_with (ww:i32,wh:i32) (e: element): game_state =
     let w = divRoundingUp ww 2
     let h = divRoundingUp wh 2
     in (0,
         replicate w (replicate h (hoodFromQuadrants e e e e)),
         ww, wh)
+
+  fun new_game (ww:i32,wh:i32): game_state =
+    new_game_with (ww,wh) nothing
+
+  fun new_game_random (ww:i32,wh:i32): game_state =
+    new_game_with (ww,wh) turnip
 
   fun step(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32): game_state =
     let hoods' = one_step (gen+1) (shiftHoods (gen%2) hoods)
@@ -65,20 +65,6 @@ module game: {
     let x' = i32 ((ul_x + s * (f32 x / f32 sw)) * f32 ww)
     let y' = i32 ((ul_y + s * (f32 y / f32 sh)) * f32 wh)
     in (x', y')
-
-  fun render (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
-    let offset = gen % 2
-    let particle_pixel (x: i32) (y: i32) =
-      elemColour (worldIndex offset hoods (x,y))
-    let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
-    let ww = (shape world_pixels)[0]
-    let wh = (shape world_pixels)[1]
-    let screen_pixel (x: i32) (y: i32) =
-      (let (x',y') = screen_point_to_world_point ul s (sw,sh) (ww,wh) (x,y)
-       in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
-          then unsafe world_pixels[x', y']
-          else 0xFFFFFFFF)
-    in map (\x -> map (screen_pixel x) (iota sh)) (iota sw)
 
   fun elemColour (x: element): i32 =
     if      x == steam_water
@@ -117,6 +103,43 @@ module game: {
     then mix (f32 (x - fire))     red
   (f32 (fire_end - x)) yellow
     else black -- handles 'nothing'
+
+  fun render (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
+    let offset = gen % 2
+    let particle_pixel (x: i32) (y: i32) =
+      elemColour (worldIndex offset hoods (x,y))
+    let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
+    let ww = (shape world_pixels)[0]
+    let wh = (shape world_pixels)[1]
+    let screen_pixel (x: i32) (y: i32) =
+      (let (x',y') = screen_point_to_world_point ul s (sw,sh) (ww,wh) (x,y)
+       in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
+          then unsafe world_pixels[x', y']
+          else 0xFFFFFFFF)
+    in map (\x -> map (screen_pixel x) (iota sh)) (iota sw)
+
+
+
+  fun dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
+    (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
+
+
+  fun line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
+    let l2 = dist_sq v w
+    in if l2 == 0f32 then dist_sq p v
+       else let t = ((#1 p - #1 v) * (#1 w - #1 v) + (#2 p - #2 v) * (#2 w - #2 v)) / l2
+            let t = if t > 1f32 then 1f32
+                    else if t < 0f32 then 0f32
+                    else t
+            in dist_sq p
+  ((#1 v) + t * (#1 w - #1 v),
+   (#2 v) + t * (#2 w - #2 v))
+
+  fun f32p (x:i32,y:i32): (f32,f32) =
+    (f32 x, f32 y)
+
+  fun line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
+    f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
 
   fun add_element(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
                  (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
@@ -159,26 +182,6 @@ module game: {
                          (if line_dist dr_p from to < f32 r then nothing else dr))
            (iota h)) (iota w)
     in (gen, hoods', ww, wh)
-
-  fun line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
-    f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
-
-  fun f32p (x:i32,y:i32): (f32,f32) =
-    (f32 x, f32 y)
-
-  fun line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
-    let l2 = dist_sq v w
-    in if l2 == 0f32 then dist_sq p v
-       else let t = ((#1 p - #1 v) * (#1 w - #1 v) + (#2 p - #2 v) * (#2 w - #2 v)) / l2
-            let t = if t > 1f32 then 1f32
-                    else if t < 0f32 then 0f32
-                    else t
-            in dist_sq p
-  ((#1 v) + t * (#1 w - #1 v),
-   (#2 v) + t * (#2 w - #2 v))
-
-  fun dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
-    (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
 
   fun insertable_elements(): []element =
     [ oil

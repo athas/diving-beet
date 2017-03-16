@@ -143,6 +143,7 @@ while True:
             elif event.key == pygame.K_RETURN:
                 paused = False
 
+    print pygame.mouse.get_pressed()
     if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
         # insert the selected element here.
 
@@ -164,5 +165,14 @@ while True:
         args = [beet_state] + [ul_x, ul_y, scale, width, height] + list(old_pos) + list(new_pos) + [modify_radius]
         beet_state = beet.clear_element(*args)
         old_pos = new_pos
+
+    elif pygame.mouse.get_pressed()[1] and pygame.mouse.get_pos() != None:
+        # Zoom to this location.
+        (abs_x,abs_y) =  pygame.mouse.get_pos()
+        rel_x = width / abs_x
+        rel_y = height / abs_y
+        ul_x += ul_x + (rel_x * (width * scale)/2)
+        ul_y += ul_y + (rel_y * (width * scale)/2)
+        scale = max(1.0/min(width,height), scale*0.5)
     else:
         old_pos = None

@@ -53,15 +53,6 @@ fun hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]
   reshape (w,h)
   (map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h)))
 
--- Compute interactions and aging for every hood, returning a new
--- array of hoods.
-fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
-  let randomish = hoodRandoms (w,h) (0,10000) gen
-  let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
-                 randomish hoods
-  in map (\r0 r1 -> map ageHood r0 r1) randomish
-     (map (\r -> map gravity r) envs)
-
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.
 fun ageHood (seed: i32) (h: hood): hood =
@@ -82,6 +73,11 @@ fun alchemy (r: i32) (h: hood): hood =
        let (dr , dl3) = applyAlchemy r dr2 dl0
        let (dl , ul ) = applyAlchemy r dl3 ul1
        in hoodFromQuadrants ul ur dl dr
+
+fun checkIfDrop (above: element) (below: element): (element, element) =
+  if isWall above || isWall below || weight below >= weight above
+  then (above, below)
+  else (below, above)
 
 -- Apply gravity within a hood.
 fun gravity (h: hood): hood =
@@ -110,7 +106,11 @@ fun gravity (h: hood): hood =
 
   in hoodFromQuadrants ul ur dl dr
 
-fun checkIfDrop (above: element) (below: element): (element, element) =
-  if isWall above || isWall below || weight below >= weight above
-  then (above, below)
-  else (below, above)
+-- Compute interactions and aging for every hood, returning a new
+-- array of hoods.
+fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
+  let randomish = hoodRandoms (w,h) (0,10000) gen
+  let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
+                 randomish hoods
+  in map (\r0 r1 -> map ageHood r0 r1) randomish
+     (map (\r -> map gravity r) envs)
