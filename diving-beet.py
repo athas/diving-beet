@@ -143,7 +143,6 @@ while True:
             elif event.key == pygame.K_RETURN:
                 paused = False
 
-    print pygame.mouse.get_pressed()
     if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
         # insert the selected element here.
 
