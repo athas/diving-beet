@@ -21,7 +21,7 @@ module game: {
   val element_at: game_state -> (f32,f32) -> f32 -> (i32,i32) -> (i32,i32) -> element
 } = {
 
-  fun shiftHoods (offset: i32) (hoods: [w][h]hood): [w][h]hood =
+  let shiftHoods (offset: i32) (hoods: [#w][#h]hood): [w][h]hood =
     let new_offset = if offset == 0 then -1 else 0
     in map (\x -> map (\y ->
                        let ul = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
@@ -37,36 +37,36 @@ module game: {
                      i32        -- world height
                     )
 
-  fun divRoundingUp (x: i32) (y: i32): i32 =
+  let divRoundingUp (x: i32) (y: i32): i32 =
     (x + y - 1) / y
 
-  fun new_game_with (ww:i32,wh:i32) (e: element): game_state =
+  let new_game_with (ww:i32,wh:i32) (e: element): game_state =
     let w = divRoundingUp ww 2
     let h = divRoundingUp wh 2
     in (0,
         replicate w (replicate h (hoodFromQuadrants e e e e)),
         ww, wh)
 
-  fun new_game (ww:i32,wh:i32): game_state =
+  let new_game (ww:i32,wh:i32): game_state =
     new_game_with (ww,wh) nothing
 
-  fun new_game_random (ww:i32,wh:i32): game_state =
+  let new_game_random (ww:i32,wh:i32): game_state =
     new_game_with (ww,wh) turnip
 
-  fun step(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32): game_state =
+  let step(gen: i32, hoods: [#w][#h]hood, ww: i32, wh: i32): game_state =
     let hoods' = one_step (gen+1) (shiftHoods (gen%2) hoods)
     in (gen+1, hoods', ww, wh)
 
   open argb
 
-  fun screen_point_to_world_point ((ul_x, ul_y): (f32,f32)) (s: f32)
+  let screen_point_to_world_point ((ul_x, ul_y): (f32,f32)) (s: f32)
                                   ((sw,sh): (i32,i32)) ((ww,wh): (i32,i32))
                                   ((x,y): (i32,i32)) =
     let x' = i32 ((ul_x + s * (f32 x / f32 sw)) * f32 ww)
     let y' = i32 ((ul_y + s * (f32 y / f32 sh)) * f32 wh)
     in (x', y')
 
-  fun elemColour (x: element): i32 =
+  let elemColour (x: element): i32 =
     if      x == steam_water
     then bright (light (light (light blue)))
     else if x == steam_condensed
@@ -104,7 +104,7 @@ module game: {
   (f32 (fire_end - x)) yellow
     else black -- handles 'nothing'
 
-  fun render (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
+  let render (gen: i32, hoods: [#w][#h]hood, ww: i32, wh: i32) (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)): [sw][sh]i32 =
     let offset = gen % 2
     let particle_pixel (x: i32) (y: i32) =
       elemColour (worldIndex offset hoods (x,y))
@@ -120,11 +120,11 @@ module game: {
 
 
 
-  fun dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
+  let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
     (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
 
 
-  fun line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
+  let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
     let l2 = dist_sq v w
     in if l2 == 0f32 then dist_sq p v
        else let t = ((#1 p - #1 v) * (#1 w - #1 v) + (#2 p - #2 v) * (#2 w - #2 v)) / l2
@@ -135,13 +135,13 @@ module game: {
   ((#1 v) + t * (#1 w - #1 v),
    (#2 v) + t * (#2 w - #2 v))
 
-  fun f32p (x:i32,y:i32): (f32,f32) =
+  let f32p (x:i32,y:i32): (f32,f32) =
     (f32 x, f32 y)
 
-  fun line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
+  let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
     f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
 
-  fun add_element(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
+  let add_element(gen: i32, hoods: [#w][#h]hood, ww: i32, wh: i32)
                  (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
                  (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32) (elem: element): game_state =
     let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
@@ -162,7 +162,7 @@ module game: {
            (iota h)) (iota w)
     in (gen, hoods', ww, wh)
 
-  fun clear_element(gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
+  let clear_element(gen: i32, hoods: [#w][#h]hood, ww: i32, wh: i32)
                    (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32))
                    (from_rel: (i32,i32)) (to_rel: (i32,i32)) (r: i32): game_state =
     let from = screen_point_to_world_point ul s (sw,sh) (ww,wh) from_rel
@@ -183,7 +183,7 @@ module game: {
            (iota h)) (iota w)
     in (gen, hoods', ww, wh)
 
-  fun insertable_elements(): []element =
+  let insertable_elements(): []element =
     [ oil
     , water
     , salt_water
@@ -200,7 +200,7 @@ module game: {
     , turnip
     , wall ]
 
-  fun element_name(x: element): []i32 =
+  let element_name(x: element): []i32 =
     if x == nothing then "nothing"
     else if x == steam_water then "steam"
     else if x == steam_condensed then "condensate"
@@ -221,7 +221,7 @@ module game: {
     else if x == wall then "wall"
     else "unnamed element"
 
-  fun element_at (gen: i32, hoods: [w][h]hood, ww: i32, wh: i32)
+  let element_at (gen: i32, hoods: [#w][#h]hood, ww: i32, wh: i32)
                  (ul: (f32,f32)) (s: f32) ((sw,sh): (i32,i32)) (rel_pos: (i32,i32)): element =
     let (x,y) = screen_point_to_world_point ul s (sw,sh) (ww,wh) rel_pos
     let offset = gen % 2

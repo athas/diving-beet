@@ -11,27 +11,27 @@ type hood = (u8,u8,u8,u8)
 -- The following two functions should be used for all hood
 -- interaction.  Never just pattern patch directly on the value!
 -- Pretend it is an abstract type.
-fun hoodQuadrants ((ul,ur,dl,dr): hood): (element, element, element, element) =
+let hoodQuadrants ((ul,ur,dl,dr): hood): (element, element, element, element) =
   (ul,ur,dl,dr)
 
-fun hoodFromQuadrants (ul: element) (ur: element) (dl: element) (dr: element): hood =
+let hoodFromQuadrants (ul: element) (ur: element) (dl: element) (dr: element): hood =
   (ul,ur,dl,dr)
 
 -- Return the requested quadrant from the given hood.
-fun hoodQuadrant (h: hood) (i: marg_pos): element =
+let hoodQuadrant (h: hood) (i: marg_pos): element =
   let (ul0, ur0, dl0, dr0) = hoodQuadrants h in
   if      i == 0 then ul0
   else if i == 1 then ur0
   else if i == 2 then dl0
   else                dr0
 
-fun indexToHood (offset: i32) (i: i32): (i32, i32) =
+let indexToHood (offset: i32) (i: i32): (i32, i32) =
   if offset == 0 then (i / 2, i % 2)
   else ((i+1) / 2, (i+1) % 2)
 
 -- Given a hood array at offset -1 or 0, return the element at index
 -- (x,y).  Out-of-bounds returns 'nothing'.
-fun worldIndex (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
+let worldIndex (offset: i32) (elems: [#w][#h]hood) ((x,y): (i32,i32)): element =
   -- First, figure out which hood (x,y) is in.
   let (hx,ix) = indexToHood offset x
   let (hy,iy) = indexToHood offset y
@@ -42,20 +42,20 @@ fun worldIndex (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
      else hoodQuadrant (unsafe elems[hx,hy]) (ix+iy*2)
 
 -- From http://stackoverflow.com/a/12996028
-fun hash(x: i32): i32 =
+let hash(x: i32): i32 =
   let x = ((x >> 16) ^ x) * 0x45d9f3b
   let x = ((x >> 16) ^ x) * 0x45d9f3b
   let x = ((x >> 16) ^ x) in
   x
 
 -- An array with a "random" number for every hood.
-fun hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
+let hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
   reshape (w,h)
   (map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h)))
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.
-fun ageHood (seed: i32) (h: hood): hood =
+let ageHood (seed: i32) (h: hood): hood =
   let (ul, ur, dl, dr) = hoodQuadrants h in
   hoodFromQuadrants (age (hash (seed^0) % 10000) ul)
                     (age (hash (seed^1) % 10000) ur)
@@ -63,7 +63,7 @@ fun ageHood (seed: i32) (h: hood): hood =
                     (age (hash (seed^3) % 10000) dr)
 
 -- Apply alchemy within a hood.
-fun alchemy (r: i32) (h: hood): hood =
+let alchemy (r: i32) (h: hood): hood =
   let (ul0, ur0, dl0, dr0) = hoodQuadrants h in
   if ul0 == ur0 && ur0 == dl0 && dl0 == dr0
   then h
@@ -74,13 +74,13 @@ fun alchemy (r: i32) (h: hood): hood =
        let (dl , ul ) = applyAlchemy r dl3 ul1
        in hoodFromQuadrants ul ur dl dr
 
-fun checkIfDrop (above: element) (below: element): (element, element) =
+let checkIfDrop (above: element) (below: element): (element, element) =
   if isWall above || isWall below || weight below >= weight above
   then (above, below)
   else (below, above)
 
 -- Apply gravity within a hood.
-fun gravity (h: hood): hood =
+let gravity (h: hood): hood =
   let (ul, ur, dl, dr) = hoodQuadrants h
 
   let (ul, ur, dl, dr) =
@@ -108,7 +108,7 @@ fun gravity (h: hood): hood =
 
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
-fun one_step (gen: i32) (hoods: [w][h]hood): [w][h]hood =
+let one_step (gen: i32) (hoods: [#w][#h]hood): [w][h]hood =
   let randomish = hoodRandoms (w,h) (0,10000) gen
   let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
                  randomish hoods
