@@ -16,13 +16,13 @@ let shiftHoods (offset: i32) (hoods: [#w][#h]hood): [w][h]hood =
   let divRoundingUp (x: i32) (y: i32): i32 =
     (x + y - 1) / y
 
-type game_state = {generation: i32,  -- generation
-                   hoods: [][]hood,  -- world data
-                   width: i32,       -- world width
-                   height: i32       -- world height
-                  }
+type game_state [w][h] = {generation: i32,   -- generation
+                          hoods: [w][h]hood, -- world data
+                          width: i32,        -- world width
+                          height: i32        -- world height
+                          }
 
-let new_game_with (ww:i32,wh:i32) (e: element): game_state =
+let new_game_with (ww:i32,wh:i32) (e: element): game_state [][] =
   let w = divRoundingUp ww 2
   let h = divRoundingUp wh 2
   in {generation = 0,
@@ -32,7 +32,7 @@ let new_game_with (ww:i32,wh:i32) (e: element): game_state =
 entry new_game (ww: i32) (wh: i32) = new_game_with (ww,wh) nothing
 entry new_game_random (ww: i32) (wh: i32) = new_game_with (ww,wh) turnip
 
-entry step ({generation=gen,hoods,width=ww,height=wh}: game_state) =
+entry step ({generation=gen,hoods,width=ww,height=wh}: game_state [#w][#h]) =
   let hoods' = one_step (gen+1) (shiftHoods (gen%2) hoods)
   in {generation=gen+1, hoods=hoods', width=ww, height=wh}
 
@@ -82,7 +82,7 @@ let elemColour (x: element): i32 =
   then mix (f32 (x - fire)) red (f32 (fire_end - x)) yellow
   else black -- handles 'nothing'
 
-entry render ({generation=gen,hoods,width=ww,height=wh}: game_state)
+entry render ({generation=gen,hoods,width=ww,height=wh}: game_state [#w][#h])
              (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) =
   let offset = gen % 2
   let particle_pixel (x: i32) (y: i32) =
@@ -117,7 +117,7 @@ let f32p (x:i32,y:i32): (f32,f32) =
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
   f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
 
-entry add_element ({generation=gen,hoods:[#w][#h]hood,width=ww,height=wh}: game_state)
+entry add_element ({generation=gen,hoods,width=ww,height=wh}: game_state [#w][#h])
                   (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
                   (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32) (elem: element) =
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
@@ -138,7 +138,7 @@ entry add_element ({generation=gen,hoods:[#w][#h]hood,width=ww,height=wh}: game_
          (iota h)) (iota w)
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
-entry clear_element ({generation=gen,hoods:[#w][#h]hood,width=ww,height=wh}: game_state)
+entry clear_element ({generation=gen,hoods,width=ww,height=wh}: game_state [#w] [#h])
                     (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
                     (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32) =
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
@@ -198,10 +198,8 @@ entry element_name(x: element): []i32 =
   else if x == wall then "wall"
   else "unnamed element"
 
-entry element_at ({generation=gen,hoods,width=ww,height=wh}: game_state)
+entry element_at ({generation=gen,hoods,width=ww,height=wh}: game_state [#w] [#h])
                  (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) (b1: i32) (b2: i32) =
   let (x,y) = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let offset = gen % 2
   in worldIndex offset hoods (x,y)
-
-
