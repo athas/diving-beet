@@ -2,6 +2,7 @@ import "/futlib/math"
 import "/futlib/colour"
 
 import "step"
+import "world"
 
 let shiftHoods (offset: i32) (hoods: [#w][#h]hood): [w][h]hood =
   let new_offset = if offset == 0 then -1 else 0
