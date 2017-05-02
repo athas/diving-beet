@@ -1,5 +1,5 @@
-import "futlib/math"
-import "futlib/colour"
+import "/futlib/math"
+import "/futlib/colour"
 
 import "step"
 
