@@ -42,8 +42,8 @@ open argb
 let screen_point_to_world_point ((ul_x, ul_y): (f32,f32)) (s: f32)
                                 ((sw,sh): (i32,i32)) ((ww,wh): (i32,i32))
                                 ((x,y): (i32,i32)) =
-  let x' = i32 ((ul_x + s * (f32 x / f32 sw)) * f32 ww)
-  let y' = i32 ((ul_y + s * (f32 y / f32 sh)) * f32 wh)
+  let x' = i32 ((ul_x + s * ((f32 x + 0.5f32) / f32 sw)) * f32 ww)
+  let y' = i32 ((ul_y + s * ((f32 y + 0.5f32) / f32 sh)) * f32 wh)
   in (x', y')
 
 let elemColour (x: element): i32 =
