@@ -31,7 +31,7 @@ let indexToHood (offset: i32) (i: i32): (i32, i32) =
 
 -- Given a hood array at offset -1 or 0, return the element at index
 -- (x,y).  Out-of-bounds returns 'nothing'.
-let worldIndex (offset: i32) (elems: [#w][#h]hood) ((x,y): (i32,i32)): element =
+let worldIndex [w][h] (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): element =
   -- First, figure out which hood (x,y) is in.
   let (hx,ix) = indexToHood offset x
   let (hy,iy) = indexToHood offset y
@@ -108,7 +108,7 @@ let gravity (h: hood): hood =
 
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
-let one_step (gen: i32) (hoods: [#w][#h]hood): [w][h]hood =
+let one_step [w][h] (gen: i32) (hoods: [w][h]hood): [w][h]hood =
   let randomish = hoodRandoms (w,h) (0,10000) gen
   let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
                  randomish hoods
