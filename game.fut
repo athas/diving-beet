@@ -90,8 +90,8 @@ entry render [w][h]
   let particle_pixel (x: i32) (y: i32) =
     elemColour (worldIndex offset hoods (x,y))
   let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
-  let ww = (shape world_pixels)[0]
-  let wh = (shape world_pixels)[1]
+  let ww = length world_pixels
+  let wh = length world_pixels
   let screen_pixel (x: i32) (y: i32) =
     (let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
      in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
