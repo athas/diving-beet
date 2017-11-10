@@ -58,11 +58,11 @@ let weight (x: element): weight =
   if x == nothing then 2u8
   else if x == steam_water then 0u8
   else if x == steam_condensed then 0u8
-  else if x == sand then u8 salt
-  else if x == lava then u8 water
-  else if x == napalm then u8 water - 1u8
+  else if x == sand then salt
+  else if x == lava then water
+  else if x == napalm then water - 1u8
   else if isFire x then 0u8
-  else u8 x
+  else x
 
 let age (r: i32) (x: element): element =
   if x == fire_end then nothing

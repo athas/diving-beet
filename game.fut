@@ -80,7 +80,7 @@ let elemColour (x: element): i32 =
   else if x == wall
   then gray 0.4f32
   else if isFire x
-  then mix (f32 (x - fire)) red (f32 (fire_end - x)) yellow
+  then mix (f32.u8 (x - fire)) red (f32.u8 (fire_end - x)) yellow
   else black -- handles 'nothing'
 
 entry render [w][h]
