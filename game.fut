@@ -103,13 +103,13 @@ let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
 let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
   let l2 = dist_sq v w
   in if l2 == 0f32 then dist_sq p v
-     else let t = ((#1 p - #1 v) * (#1 w - #1 v) + (#2 p - #2 v) * (#2 w - #2 v)) / l2
+     else let t = ((p.1 - v.1) * (w.1 - v.1) + (p.2 - v.2) * (w.2 - v.2)) / l2
           let t = if t > 1f32 then 1f32
                   else if t < 0f32 then 0f32
                   else t
           in dist_sq p
-((#1 v) + t * (#1 w - #1 v),
- (#2 v) + t * (#2 w - #2 v))
+  ((v.1) + t * (w.1 - v.1),
+   (v.2) + t * (w.2 - v.2))
 
 let f32p (x:i32,y:i32): (f32,f32) =
   (r32 x, r32 y)
