@@ -42,8 +42,8 @@ open argb
 let screen_point_to_world_point ((ul_x, ul_y): (f32,f32)) (s: f32)
                                 ((sw,sh): (i32,i32)) ((ww,wh): (i32,i32))
                                 ((x,y): (i32,i32)) =
-  let x' = i32 ((ul_x + s * ((f32 x + 0.5f32) / f32 sw)) * f32 ww)
-  let y' = i32 ((ul_y + s * ((f32 y + 0.5f32) / f32 sh)) * f32 wh)
+  let x' = t32 ((ul_x + s * ((r32 x + 0.5f32) / r32 sw)) * r32 ww)
+  let y' = t32 ((ul_y + s * ((r32 y + 0.5f32) / r32 sh)) * r32 wh)
   in (x', y')
 
 let elemColour (x: element): i32 =
@@ -112,7 +112,7 @@ let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
  (#2 v) + t * (#2 w - #2 v))
 
 let f32p (x:i32,y:i32): (f32,f32) =
-  (f32 x, f32 y)
+  (r32 x, r32 y)
 
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
   f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
@@ -132,10 +132,10 @@ entry add_element [w][h]
                     let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
                     let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
                     in hoodFromQuadrants
-                       (if line_dist ul_p from to < f32 r && ul == nothing then elem else ul)
-                       (if line_dist ur_p from to < f32 r && ur == nothing then elem else ur)
-                       (if line_dist dl_p from to < f32 r && dl == nothing then elem else dl)
-                       (if line_dist dr_p from to < f32 r && dr == nothing then elem else dr))
+                       (if line_dist ul_p from to < r32 r && ul == nothing then elem else ul)
+                       (if line_dist ur_p from to < r32 r && ur == nothing then elem else ur)
+                       (if line_dist dl_p from to < r32 r && dl == nothing then elem else dl)
+                       (if line_dist dr_p from to < r32 r && dr == nothing then elem else dr))
          (iota h)) (iota w)
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
@@ -154,10 +154,10 @@ entry clear_element [w][h]
                     let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
                     let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
                     in hoodFromQuadrants
-                       (if line_dist ul_p from to < f32 r then nothing else ul)
-                       (if line_dist ur_p from to < f32 r then nothing else ur)
-                       (if line_dist dl_p from to < f32 r then nothing else dl)
-                       (if line_dist dr_p from to < f32 r then nothing else dr))
+                       (if line_dist ul_p from to < r32 r then nothing else ul)
+                       (if line_dist ur_p from to < r32 r then nothing else ur)
+                       (if line_dist dl_p from to < r32 r then nothing else dl)
+                       (if line_dist dr_p from to < r32 r then nothing else dr))
          (iota h)) (iota w)
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
