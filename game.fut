@@ -95,7 +95,7 @@ entry render [w][h]
      in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
         then unsafe world_pixels[x', y']
         else 0xFFFFFFFF)
-  in argb.to_screen (map (\x -> map (screen_pixel x) (iota sh)) (iota sw))
+  in map (\x -> map (screen_pixel x) (iota sh)) (iota sw)
 
 let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
   (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)

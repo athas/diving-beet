@@ -110,7 +110,7 @@ let gravity (h: hood): hood =
 -- array of hoods.
 let one_step [w][h] (gen: i32) (hoods: [w][h]hood): [w][h]hood =
   let randomish = hoodRandoms (w,h) (0,10000) gen
-  let envs = map (\randomish_r hoods_r -> map alchemy randomish_r hoods_r)
-                 randomish hoods
-  in map (\r0 r1 -> map ageHood r0 r1) randomish
+  let envs = map2 (\randomish_r hoods_r -> map2 alchemy randomish_r hoods_r)
+                  randomish hoods
+  in map2 (\r0 r1 -> map2 ageHood r0 r1) randomish
      (map (\r -> map gravity r) envs)
