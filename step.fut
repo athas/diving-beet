@@ -50,8 +50,8 @@ let hash(x: i32): i32 =
 
 -- An array with a "random" number for every hood.
 let hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
-  reshape (w,h)
-  (map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h)))
+  map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h))
+  |> unflatten w h
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.
