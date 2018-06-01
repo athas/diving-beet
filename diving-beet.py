@@ -13,7 +13,7 @@ fullscreen = False
 if fullscreen:
     desired_size = None
 else:
-    desired_size = (1200,800)
+    desired_size = (1024,768)
 
 pygame.init()
 pygame.display.set_caption('Diving Beet')
@@ -24,6 +24,7 @@ else:
 width = screen.get_width()
 height = screen.get_height()
 size = (width,height)
+surface = pygame.Surface(size, depth=32)
 font = pygame.font.Font(None, 36)
 pygame.key.set_repeat(100, 100)
 
@@ -76,7 +77,8 @@ while True:
     futhark_time = (end-start)*1000
 
     start = time.time()
-    pygame.surfarray.blit_array(screen, frame)
+    pygame.surfarray.blit_array(surface, frame)
+    screen.blit(surface, (0, 0))
     end = time.time()
     blit_time = (end-start)*1000
 
