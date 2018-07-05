@@ -6,7 +6,21 @@ import pygame
 import time
 import sys
 
-beet = game.game(interactive=True)
+from futhark_ffi import Futhark
+
+try:
+    import _game
+    from futhark_ffi.compat import FutharkCompat
+    print('Using futhark-pycffi backend.')
+    def futhark_object():
+        return FutharkCompat(_game)
+except ImportError:
+    import game
+    print('Using futhark-pyopencl backend.')
+    def futhark_object():
+        return game.game(interactive=True)
+
+beet = futhark_object()
 
 fullscreen = False
 
