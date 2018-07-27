@@ -23,17 +23,21 @@ type game_state [w][h] = {generation: i32,   -- generation
                           height: i32        -- world height
                           }
 
-let new_game_with (ww:i32,wh:i32) (e: element): game_state [][] =
+-- | The un-parameterised game state type that we expose to the
+-- outside world.
+type ext_game_state = game_state [] []
+
+let new_game_with (ww:i32,wh:i32) (e: element): ext_game_state =
   let w = divRoundingUp ww 2
   let h = divRoundingUp wh 2
   in {generation = 0,
       hoods = replicate w (replicate h (hoodFromQuadrants e e e e)),
       width = ww, height = wh}
 
-entry new_game (ww: i32) (wh: i32) = new_game_with (ww,wh) nothing
-entry new_game_random (ww: i32) (wh: i32) = new_game_with (ww,wh) turnip
+entry new_game (ww: i32) (wh: i32): ext_game_state = new_game_with (ww,wh) nothing
+entry new_game_random (ww: i32) (wh: i32): ext_game_state = new_game_with (ww,wh) turnip
 
-entry step [w][h] ({generation=gen,hoods,width=ww,height=wh}: game_state [w][h]) =
+entry step ({generation=gen,hoods,width=ww,height=wh}: ext_game_state): ext_game_state =
   let hoods' = one_step (gen+1) (shiftHoods (gen%2) hoods)
   in {generation=gen+1, hoods=hoods', width=ww, height=wh}
 
@@ -83,8 +87,7 @@ let elemColour (x: element): i32 =
   then mix (f32.u8 (x - fire)) red (f32.u8 (fire_end - x)) yellow
   else black -- handles 'nothing'
 
-entry render [w][h]
-             ({generation=gen,hoods,width=ww,height=wh}: game_state [w][h])
+entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
              (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) =
   let offset = gen % 2
   let particle_pixel (x: i32) (y: i32) =
@@ -117,10 +120,10 @@ let f32p (x:i32,y:i32): (f32,f32) =
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
   f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))
 
-entry add_element [w][h]
-                  ({generation=gen,hoods,width=ww,height=wh}: game_state [w][h])
+entry add_element [h][w]
+                  ({generation=gen,hoods: [w][h]hood,width=ww,height=wh}: ext_game_state)
                   (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
-                  (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32) (elem: element) =
+                  (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32) (elem: element): ext_game_state =
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let to   = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (c1,c2)
   let offset = gen % 2
@@ -139,16 +142,16 @@ entry add_element [w][h]
          (iota h)) (iota w)
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
-entry clear_element [w][h]
-                    ({generation=gen,hoods,width=ww,height=wh}: game_state [w] [h])
+entry clear_element [h][w]
+                    ({generation=gen,hoods:[h][w]hood,width=ww,height=wh}: ext_game_state)
                     (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
-                    (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32) =
+                    (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32): ext_game_state =
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let to   = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (c1,c2)
   let offset = gen % 2
   let hoods' =
     map (\x -> map (\y ->
-                    let (ul, ur, dl, dr) = hoodQuadrants hoods[x,y]
+                    let (ul, ur, dl, dr) = unsafe hoodQuadrants hoods[x,y]
                     let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
                     let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
                     let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
@@ -200,8 +203,7 @@ entry element_name(x: element): []i32 =
   else if x == wall then "wall"
   else "unnamed element"
 
-entry element_at [w][h]
-                 ({generation=gen,hoods,width=ww,height=wh}: game_state [w] [h])
+entry element_at ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
                  (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) (b1: i32) (b2: i32) =
   let (x,y) = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let offset = gen % 2
