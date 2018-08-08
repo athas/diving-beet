@@ -5,14 +5,17 @@ all: game.py
 run: game.py
 	python diving-beet.py
 
-game.py: $(FUTHARK_SRC)
+game.py: $(FUTHARK_SRC) lib
 	futhark-pyopencl --library game.fut
 
-game.c: game.fut
+game.c: game.fut lib
 	futhark-opencl --library game.fut
 
 _game.so: game.c
 	build_futhark_ffi game
 
+lib: futhark.pkg
+	futhark-pkg sync
+
 clean:
-	rm -f *.pyc game.py
+	rm -rf *.pyc game.py lib

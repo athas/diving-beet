@@ -1,5 +1,4 @@
-import "/futlib/math"
-import "/futlib/colour"
+import "lib/github.com/athas/matte/colour"
 
 import "step"
 import "world"
