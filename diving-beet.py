@@ -82,6 +82,8 @@ def advance():
     global beet_state
     beet_state = beet.step(beet_state)
 
+saved = None
+
 while True:
     start = time.time()
     if not paused:
@@ -158,6 +160,11 @@ while True:
                 advance()
             elif event.key == pygame.K_RETURN:
                 paused = False
+            elif event.key == pygame.K_s:
+                saved = beet_state
+            elif event.key == pygame.K_r:
+                if saved:
+                    beet_state = saved
 
     if pygame.mouse.get_pressed()[0] and pygame.mouse.get_pos() != None:
         # insert the selected element here.
