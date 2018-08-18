@@ -6,8 +6,6 @@ import pygame
 import time
 import sys
 
-from futhark_ffi import Futhark
-
 try:
     import _game
     from futhark_ffi.compat import FutharkCompat
