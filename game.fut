@@ -97,7 +97,7 @@ entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
      in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
         then unsafe world_pixels[x', y']
         else 0xFFFFFFFF)
-  in map (\x -> map (screen_pixel x) (iota sh)) (iota sw)
+  in map (\y -> map (`screen_pixel` y) (iota sw)) (iota sh)
 
 let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
   (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)

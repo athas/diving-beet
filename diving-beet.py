@@ -86,7 +86,7 @@ while True:
     start = time.time()
     if not paused:
         advance()
-    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height).get()
+    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height).transpose().get()
     end = time.time()
     futhark_time = (end-start)*1000
 
