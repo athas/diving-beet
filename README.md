@@ -28,9 +28,9 @@ Usage with Go
 -------------
 
 Diving Beet has also been implemented with a GUI written in Go.  This
-performs much better on some systems.  Make sure you have Go and
-[github.com/veandco/go-sdl2](https://github.com/veandco/go-sdl2)
-installed and then run:
+performs much better on some systems.  Make sure you have Go and the
+packages `github.com/veandco/go-sdl2/sdl` and
+`github.com/veandco/go-sdl2/ttf` installed, and then run:
 
 ```
 $ make diving-beet
