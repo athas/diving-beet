@@ -13,12 +13,12 @@ import (
 )
 
 type Game struct {
-	cfg *C.struct_futhark_context_config
-	ctx *C.struct_futhark_context
-	state *C.struct_futhark_opaque_ext_game_state
-	Frame unsafe.Pointer
-	screenX C.int
-	screenY C.int
+	cfg       *C.struct_futhark_context_config
+	ctx       *C.struct_futhark_context
+	state     *C.struct_futhark_opaque_ext_game_state
+	Frame     unsafe.Pointer
+	screenX   C.int
+	screenY   C.int
 	nameCache map[C.uchar]string
 }
 
@@ -37,9 +37,9 @@ func NewGame(screenX, screenY int) Game {
 	var state *C.struct_futhark_opaque_ext_game_state
 	C.futhark_entry_new_game(ctx, &state, C.int(screenX), C.int(screenY))
 
-	frame := C.malloc(C.ulong(screenX*screenY*4))
+	frame := C.malloc(C.ulong(screenX * screenY * 4))
 
-	return Game {
+	return Game{
 		cfg, ctx, state, frame, C.int(screenX), C.int(screenY),
 		make(map[C.uchar]string),
 	}
@@ -66,29 +66,29 @@ func (g Game) Render(ul_x, ul_y, scale float64, screenX, screenY int) {
 	C.futhark_values_i32_2d(g.ctx, frame_fut, (*C.int)(g.Frame))
 }
 
-func (g *Game) AddElem (
+func (g *Game) AddElem(
 	ul_x, ul_y, scale float64,
 	from_x, from_y, to_x, to_y int32,
 	radius int, what Element) {
-		defer C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
-		C.futhark_entry_add_element(
-			g.ctx, &g.state, g.state,
-			C.float(ul_x), C.float(ul_y), C.float(scale), C.int(g.screenX), C.int(g.screenY),
-			C.int32_t(from_x), C.int32_t(from_y), C.int32_t(to_x), C.int32_t(to_y),
-			C.int32_t(radius), C.uint8_t(what.code))
-	}
+	defer C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
+	C.futhark_entry_add_element(
+		g.ctx, &g.state, g.state,
+		C.float(ul_x), C.float(ul_y), C.float(scale), C.int(g.screenX), C.int(g.screenY),
+		C.int32_t(from_x), C.int32_t(from_y), C.int32_t(to_x), C.int32_t(to_y),
+		C.int32_t(radius), C.uint8_t(what.code))
+}
 
-func (g *Game) ClearElem (
+func (g *Game) ClearElem(
 	ul_x, ul_y, scale float64,
 	from_x, from_y, to_x, to_y int32,
 	radius int) {
-		defer C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
-		C.futhark_entry_clear_element(
-			g.ctx, &g.state, g.state,
-			C.float(ul_x), C.float(ul_y), C.float(scale), C.int(g.screenX), C.int(g.screenY),
-			C.int32_t(from_x), C.int32_t(from_y), C.int32_t(to_x), C.int32_t(to_y),
-			C.int32_t(radius))
-	}
+	defer C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
+	C.futhark_entry_clear_element(
+		g.ctx, &g.state, g.state,
+		C.float(ul_x), C.float(ul_y), C.float(scale), C.int(g.screenX), C.int(g.screenY),
+		C.int32_t(from_x), C.int32_t(from_y), C.int32_t(to_x), C.int32_t(to_y),
+		C.int32_t(radius))
+}
 
 func (g Game) Elements() []Element {
 	var elements_fut *C.struct_futhark_u8_1d
@@ -105,7 +105,7 @@ func (g Game) Elements() []Element {
 
 	ret := make([]Element, num_elements)
 	for i := 0; i < (int)(num_elements); i++ {
-		element := *(*C.uchar)(unsafe.Pointer(((uintptr)(elements))+(uintptr)(i)))
+		element := *(*C.uchar)(unsafe.Pointer(((uintptr)(elements)) + (uintptr)(i)))
 
 		var name_fut *C.struct_futhark_i32_1d
 
@@ -114,12 +114,12 @@ func (g Game) Elements() []Element {
 
 		num_chars := (int)(*C.futhark_shape_i32_1d(g.ctx, name_fut))
 
-		name := C.malloc(C.ulong(num_chars)*4)
+		name := C.malloc(C.ulong(num_chars) * 4)
 		defer C.free(name)
 
 		C.futhark_values_i32_1d(g.ctx, name_fut, (*C.int)(name))
 
-		ret[i] = Element { element, g.elementName(element) }
+		ret[i] = Element{element, g.elementName(element)}
 	}
 	return ret
 }
@@ -130,7 +130,7 @@ func (g Game) ElementAt(ul_x, ul_y, scale float64, x, y int32) Element {
 		g.ctx, &element, g.state,
 		C.float(ul_x), C.float(ul_y), C.float(scale), g.screenX, g.screenY,
 		C.int(x), C.int(y))
-	return Element { element, g.elementName(element) }
+	return Element{element, g.elementName(element)}
 }
 
 func (g Game) elementName(element C.uchar) string {
@@ -145,14 +145,14 @@ func (g Game) elementName(element C.uchar) string {
 
 	num_chars := (int)(*C.futhark_shape_i32_1d(g.ctx, name_fut))
 
-	name := C.malloc(C.ulong(num_chars)*4)
+	name := C.malloc(C.ulong(num_chars) * 4)
 	defer C.free(name)
 
 	C.futhark_values_i32_1d(g.ctx, name_fut, (*C.int)(name))
 
 	s := ""
 	for i := 0; i < num_chars; i++ {
-		s += string((int32)(*(*int32)(unsafe.Pointer(((uintptr)(name))+((uintptr)(i)*4)))))
+		s += string((int32)(*(*int32)(unsafe.Pointer(((uintptr)(name)) + ((uintptr)(i) * 4)))))
 	}
 
 	g.nameCache[element] = s

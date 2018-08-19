@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	"sort"
+	"time"
 )
 
 // ByName implements sort.Interface for []Element based on
@@ -16,7 +16,7 @@ func (a ByName) Len() int           { return len(a) }
 func (a ByName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByName) Less(i, j int) bool { return a[i].Name < a[j].Name }
 
-func min (x, y float64) float64 {
+func min(x, y float64) float64 {
 	if x < y {
 		return x
 	} else {
@@ -24,7 +24,7 @@ func min (x, y float64) float64 {
 	}
 }
 
-func max (x, y float64) float64 {
+func max(x, y float64) float64 {
 	if x < y {
 		return y
 	} else {
@@ -90,20 +90,20 @@ func main() {
 	defer frame_surface.Free()
 
 	white := sdl.Color{R: 255, G: 255, B: 255, A: 255}
-	showText := func (s string, x, y int32) {
+	showText := func(s string, x, y int32) {
 		var solid *sdl.Surface
 		if solid, err = font.RenderUTF8Solid(s, white); err != nil {
 			panic(err)
 		}
 		defer solid.Free()
 
-		r := sdl.Rect{X:x, Y:y, W:0, H:0}
+		r := sdl.Rect{X: x, Y: y, W: 0, H: 0}
 		if err = solid.Blit(nil, window_surface, &r); err != nil {
 			panic(err)
 		}
 	}
 
-	render := func () {
+	render := func() {
 		start := time.Now()
 
 		if !paused {
@@ -130,7 +130,7 @@ func main() {
 			fmt.Sprintf(
 				"Inserting %s (radius %d)",
 				elements[selected_element].Name, radius),
-			0, int32(text_size + 5))
+			0, int32(text_size+5))
 		showText(
 			fmt.Sprintf(
 				"Under cursor %s", game.ElementAt(ul_x, ul_y, scale, last_mouse_x, last_mouse_y).Name),
@@ -139,12 +139,12 @@ func main() {
 		window.UpdateSurface()
 	}
 
-	rebound := func () {
+	rebound := func() {
 		ul_x = min(1.0-scale, max(0, ul_x))
 		ul_y = min(1.0-scale, max(0, ul_y))
 	}
 
-	onKeyboard := func (t sdl.KeyboardEvent) {
+	onKeyboard := func(t sdl.KeyboardEvent) {
 		if t.Type == sdl.KEYDOWN {
 			switch t.Keysym.Sym {
 			case sdl.K_RIGHT:
@@ -160,10 +160,10 @@ func main() {
 				ul_y += 0.01
 				rebound()
 			case sdl.K_PLUS, sdl.K_p:
-				scale = max(1/min(float64(screenX),float64(screenY)), scale*0.99)
-                rebound()
+				scale = max(1/min(float64(screenX), float64(screenY)), scale*0.99)
+				rebound()
 			case sdl.K_MINUS, sdl.K_l:
-				scale = min(1.0, scale * 1.01)
+				scale = min(1.0, scale*1.01)
 				rebound()
 			case sdl.K_SPACE:
 				paused = true
@@ -176,23 +176,23 @@ func main() {
 			case sdl.K_PAGEDOWN:
 				selected_element = selected_element - 1
 				if selected_element < 0 {
-					selected_element = len(elements)-1
+					selected_element = len(elements) - 1
 				}
 			}
 		}
 	}
 
-	onMouseButton := func (t sdl.MouseButtonEvent) {
+	onMouseButton := func(t sdl.MouseButtonEvent) {
 	}
 
-	onMouseWheel := func (t sdl.MouseWheelEvent) {
+	onMouseWheel := func(t sdl.MouseWheelEvent) {
 		radius -= int(t.Y)
 		if radius < 1 {
 			radius = 1
 		}
 	}
 
-	checkMouse := func () {
+	checkMouse := func() {
 		x, y, s := sdl.GetMouseState()
 		if !mouse_down && s != 0 {
 			mouse_down = true
