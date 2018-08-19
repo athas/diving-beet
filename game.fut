@@ -142,7 +142,7 @@ entry add_element [h][w]
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
 entry clear_element [h][w]
-                    ({generation=gen,hoods:[h][w]hood,width=ww,height=wh}: ext_game_state)
+                    ({generation=gen,hoods:[w][h]hood,width=ww,height=wh}: ext_game_state)
                     (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
                     (b1: i32) (b2: i32) (c1: i32) (c2: i32) (r: i32): ext_game_state =
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)

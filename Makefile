@@ -18,4 +18,7 @@ lib: futhark.pkg
 	futhark-pkg sync
 
 clean:
-	rm -rf *.pyc game.py lib
+	rm -rf *.pyc game.py lib diving-beet *.c
+
+diving-beet: game.c diving-beet.go game.go
+	go build

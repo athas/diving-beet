@@ -2,5 +2,7 @@ TAGS
 *.pyc
 game.py
 *.c
+*.h
 game
 lib
+diving-beet
