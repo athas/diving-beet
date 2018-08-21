@@ -38,7 +38,7 @@ func NewGame(screenX, screenY int) Game {
 	var state *C.struct_futhark_opaque_ext_game_state
 	C.futhark_entry_new_game(ctx, &state, C.int32_t(screenX), C.int32_t(screenY))
 
-	frame := C.malloc(C.ulong(screenX * screenY * 4))
+	frame := C.malloc(C.ulong(screenX * screenY * 3))
 
 	return Game{
 		cfg, ctx, state, frame, C.int32_t(screenX), C.int32_t(screenY),
@@ -59,12 +59,12 @@ func (g *Game) Step() {
 }
 
 func (g Game) Render(ul_x, ul_y, scale float64, screenX, screenY int) {
-	var frame_fut *C.struct_futhark_i32_2d
+	var frame_fut *C.struct_futhark_u8_3d
 	C.futhark_entry_render(g.ctx, &frame_fut, g.state,
 		C.float(ul_x), C.float(ul_y), C.float(scale),
 		C.int32_t(screenX), C.int32_t(screenY))
-	defer C.futhark_free_i32_2d(g.ctx, frame_fut)
-	C.futhark_values_i32_2d(g.ctx, frame_fut, (*C.int32_t)(g.Frame))
+	defer C.futhark_free_u8_3d(g.ctx, frame_fut)
+	C.futhark_values_u8_3d(g.ctx, frame_fut, (*C.uint8_t)(g.Frame))
 }
 
 func (g *Game) AddElem(

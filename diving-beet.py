@@ -36,7 +36,6 @@ else:
 width = screen.get_width()
 height = screen.get_height()
 size = (width,height)
-surface = pygame.Surface(size, depth=32)
 font = pygame.font.Font(None, 36)
 pygame.key.set_repeat(100, 100)
 
@@ -86,13 +85,12 @@ while True:
     start = time.time()
     if not paused:
         advance()
-    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height).transpose().get()
+    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height).get().transpose(1,0,2)
     end = time.time()
     futhark_time = (end-start)*1000
 
     start = time.time()
-    pygame.surfarray.blit_array(surface, frame)
-    screen.blit(surface, (0, 0))
+    screen.blit(pygame.surfarray.make_surface(frame), (0, 0))
     end = time.time()
     blit_time = (end-start)*1000
 
