@@ -90,14 +90,13 @@ entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
              (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) =
   let offset = gen % 2
   let particle_pixel (x: i32) (y: i32) =
-    let (r,g,b,_) = argb.to_rgba (elemColour (worldIndex offset hoods (x,y)))
-    in [u8.f32(r*255), u8.f32(g*255), u8.f32(b*255)]
+    elemColour (worldIndex offset hoods (x,y))
   let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
   let screen_pixel (x: i32) (y: i32) =
     (let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
      in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
         then unsafe world_pixels[x', y']
-        else [0xFF,0xFF,0xFF])
+        else 0xFFFFFFFF)
   in map (\y -> map (`screen_pixel` y) (iota sw)) (iota sh)
 
 let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =

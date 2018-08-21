@@ -83,7 +83,7 @@ func main() {
 	}
 
 	frame_surface, err :=
-		sdl.CreateRGBSurfaceFrom(game.Frame, int32(screenX), int32(screenY), 24, screenX*3, 0xFF, 0xFF00, 0xFF0000, 0x00000000)
+		sdl.CreateRGBSurfaceFrom(game.Frame, int32(screenX), int32(screenY), 32, screenX*4, 0xFF0000, 0xFF00, 0xFF, 0x00000000)
 	if err != nil {
 		panic(err)
 	}
