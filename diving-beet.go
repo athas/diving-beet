@@ -186,7 +186,7 @@ func main() {
 	}
 
 	onMouseWheel := func(t sdl.MouseWheelEvent) {
-		radius -= int(t.Y)
+		radius += int(t.Y)
 		if radius < 1 {
 			radius = 1
 		}
