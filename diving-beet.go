@@ -51,8 +51,8 @@ func main() {
 	game := NewGame(screenX, screenY)
 	defer game.Free()
 
-	elements := game.Elements()
-	sort.Sort(ByName(elements))
+	insertable_elements := game.Elements()
+	sort.Sort(ByName(insertable_elements))
 
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
@@ -129,7 +129,7 @@ func main() {
 		showText(
 			fmt.Sprintf(
 				"Inserting %s (radius %d)",
-				elements[selected_element].Name, radius),
+				insertable_elements[selected_element].Name, radius),
 			0, int32(text_size+5))
 		showText(
 			fmt.Sprintf(
@@ -172,11 +172,11 @@ func main() {
 				paused = false
 
 			case sdl.K_PAGEUP:
-				selected_element = (selected_element + 1) % len(elements)
+				selected_element = (selected_element + 1) % len(insertable_elements)
 			case sdl.K_PAGEDOWN:
 				selected_element = selected_element - 1
 				if selected_element < 0 {
-					selected_element = len(elements) - 1
+					selected_element = len(insertable_elements) - 1
 				}
 			}
 		}
@@ -204,13 +204,20 @@ func main() {
 			if s == 0 {
 				mouse_down = false
 			} else if (s & sdl.ButtonLMask()) != 0 {
-				game.AddElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius, elements[selected_element])
+				game.AddElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius, insertable_elements[selected_element])
 			} else if (s & sdl.ButtonRMask()) != 0 {
 				game.ClearElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius)
 			}
 		}
 
 		last_mouse_x, last_mouse_y = x, y
+	}
+
+	// Set the initial selection to sand.
+	for i, e := range insertable_elements {
+		if e.Name == "sand" {
+			selected_element = i
+		}
 	}
 
 	running := true
