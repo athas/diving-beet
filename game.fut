@@ -86,21 +86,29 @@ let elemColour (x: element): i32 =
   then mix (f32.u8 (x - fire)) red (f32.u8 (fire_end - x)) yellow
   else black -- handles 'nothing'
 
+
+let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
+  (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
+
+let f32p (x:i32,y:i32): (f32,f32) =
+  (r32 x, r32 y)
+
 entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
-             (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32) =
+             (ul_x: f32) (ul_y: f32) (s: f32) (sw: i32) (sh: i32)
+             (b1: i32) (b2: i32) (r: i32) =
+  let mouse_pos = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let offset = gen % 2
   let particle_pixel (x: i32) (y: i32) =
     elemColour (worldIndex offset hoods (x,y))
   let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
   let screen_pixel (x: i32) (y: i32) =
     (let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
-     in if x' >= 0 && x' < ww && y' >= 0 && y' < wh
+     let dist_to_mouse = dist_sq (f32p (x',y')) (f32p mouse_pos)
+     let on_select_border = t32 (f32.round (f32.sqrt dist_to_mouse)) == r
+     in if x' >= 0 && x' < ww && y' >= 0 && y' < wh && !on_select_border
         then unsafe world_pixels[x', y']
         else 0xFFFFFFFF)
   in map (\y -> map (`screen_pixel` y) (iota sw)) (iota sh)
-
-let dist_sq(x0:f32,y0:f32) (x1:f32,y1:f32): f32 =
-  (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1)
 
 let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
   let l2 = dist_sq v w
@@ -113,8 +121,6 @@ let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
   ((v.1) + t * (w.1 - v.1),
    (v.2) + t * (w.2 - v.2))
 
-let f32p (x:i32,y:i32): (f32,f32) =
-  (r32 x, r32 y)
 
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
   f32.sqrt (line_dist_sq (f32p p) (f32p v) (f32p w))

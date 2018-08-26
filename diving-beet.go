@@ -35,18 +35,18 @@ func max(x, y float64) float64 {
 func main() {
 	var err error
 
-	screenX := 1024
-	screenY := 768
+	screenX := int32(1024)
+	screenY := int32(768)
 	ul_x := 0.0
 	ul_y := 0.0
 	scale := 1.0
-	radius := 10
+	radius := int32(10)
 	selected_element := 0
 	mouse_down := false
 	last_mouse_x := int32(0)
 	last_mouse_y := int32(0)
 	paused := false
-	steps_per_frame := 10
+	steps_per_frame := 1
 
 	game := NewGame(screenX, screenY)
 	defer game.Free()
@@ -83,7 +83,7 @@ func main() {
 	}
 
 	frame_surface, err :=
-		sdl.CreateRGBSurfaceFrom(game.Frame, int32(screenX), int32(screenY), 32, screenX*4, 0xFF0000, 0xFF00, 0xFF, 0x00000000)
+		sdl.CreateRGBSurfaceFrom(game.Frame, int32(screenX), int32(screenY), 32, int(screenX*4), 0xFF0000, 0xFF00, 0xFF, 0x00000000)
 	if err != nil {
 		panic(err)
 	}
@@ -111,7 +111,7 @@ func main() {
 				game.Step()
 			}
 		}
-		game.Render(ul_x, ul_y, scale, screenX, screenY)
+		game.Render(ul_x, ul_y, scale, screenX, screenY, last_mouse_x, last_mouse_y, radius)
 
 		fut_time := time.Now().Sub(start)
 
@@ -186,7 +186,7 @@ func main() {
 	}
 
 	onMouseWheel := func(t sdl.MouseWheelEvent) {
-		radius += int(t.Y)
+		radius += t.Y
 		if radius < 1 {
 			radius = 1
 		}

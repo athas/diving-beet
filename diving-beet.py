@@ -86,7 +86,8 @@ while True:
     start = time.time()
     if not paused:
         advance()
-    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height).transpose().get()
+    x,y = pygame.mouse.get_pos()
+    frame = beet.render(beet_state, ul_x, ul_y, scale, width, height, x, y, modify_radius).transpose().get()
     end = time.time()
     futhark_time = (end-start)*1000
 
