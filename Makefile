@@ -8,7 +8,7 @@ run: game.py
 game.py: $(FUTHARK_SRC) lib
 	futhark-pyopencl --library game.fut
 
-game.c: game.fut lib
+game.c: *.fut lib
 	futhark-opencl --library game.fut
 
 _game.so: game.c
