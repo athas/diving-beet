@@ -68,11 +68,11 @@ let alchemy (r: i32) (h: hood): hood =
   if ul0 == ur0 && ur0 == dl0 && dl0 == dr0
   then h
   else -- Apply interaction among the components
-       let (ul1, ur1) = applyAlchemy r ul0 ur0
-       let (ur , dr2) = applyAlchemy r ur1 dr0
-       let (dr , dl3) = applyAlchemy r dr2 dl0
-       let (dl , ul ) = applyAlchemy r dl3 ul1
-       in hoodFromQuadrants ul ur dl dr
+  let (ul1, ur1, dr1, dl1) =
+    loop (a, b, c, d) = (ul0, ur0, dr0, dl0) for _i < 4 do
+      let (a', b') = applyAlchemy r a b
+      in (b', c, d, a')
+  in hoodFromQuadrants ul1 ur1 dl1 dr1
 
 let checkIfDrop (above: element) (below: element): (element, element) =
   if isWall above || isWall below || weight below >= weight above
