@@ -170,7 +170,7 @@ entry clear_element [h][w]
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
 
-entry insertable_elements() =
+entry insertable_elements =
   [ oil
   , water
   , salt_water
