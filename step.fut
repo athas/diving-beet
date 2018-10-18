@@ -69,7 +69,7 @@ let alchemy (r: i32) (h: hood): hood =
   then h
   else -- Apply interaction among the components
   let (ul1, ur1, dr1, dl1) =
-    loop (a, b, c, d) = (ul0, ur0, dr0, dl0) for _i < 4 do
+    loop (a, b, c, d) = (ul0, ur0, dr0, dl0) for _i < 4i32 do
       let (a', b') = applyAlchemy r a b
       in (b', c, d, a')
   in hoodFromQuadrants ul1 ur1 dl1 dr1
