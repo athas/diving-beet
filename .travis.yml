@@ -13,6 +13,7 @@ addons:
     - libffi6
     - ocl-icd-libopencl1
     - opencl-headers
+    - pybind11-dev
 
 before_install:
  # install Futhark
