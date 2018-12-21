@@ -90,9 +90,9 @@ let applyAlchemy (r: i32) (x: element) (y: element): (element, element) =
   else if x == lava && y == water then (stone, steam_water)
 
   -- salt_water + lava = steam + stone OR steam + salt
-  else if x == salt_water && y == lava then
-    (if r < 2000 then (steam_water, salt) else (steam_water, stone))
-  else if x == lava && y == salt_water then
-    (if r < 2000 then (salt, steam_water) else (stone, steam_water))
+  else if x == salt_water && y == lava
+  then if r < 2000 then (steam_water, salt) else (steam_water, stone)
+  else if x == lava && y == salt_water
+  then if r < 2000 then (salt, steam_water) else (stone, steam_water)
 
   else (x,y)

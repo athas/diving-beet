@@ -51,7 +51,7 @@ let hash(x: i32): i32 =
 -- An array with a "random" number for every hood.
 let hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
   map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h))
-  |> unflatten w h
+      |> unflatten w h
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.
@@ -70,8 +70,8 @@ let alchemy (r: i32) (h: hood): hood =
   else -- Apply interaction among the components
   let (ul1, ur1, dr1, dl1) =
     loop (a, b, c, d) = (ul0, ur0, dr0, dl0) for _i < 4i32 do
-      let (a', b') = applyAlchemy r a b
-      in (b', c, d, a')
+    let (a', b') = applyAlchemy r a b
+    in (b', c, d, a')
   in hoodFromQuadrants ul1 ur1 dl1 dr1
 
 let checkIfDrop (above: element) (below: element): (element, element) =
@@ -82,7 +82,6 @@ let checkIfDrop (above: element) (below: element): (element, element) =
 -- Apply gravity within a hood.
 let gravity (h: hood): hood =
   let (ul, ur, dl, dr) = hoodQuadrants h
-
   let (ul, ur, dl, dr) =
     -- First check for fluid flow.
     if ((isFluid dl && dr == nothing) || (isFluid dr && dl == nothing)) &&
@@ -113,4 +112,4 @@ let one_step [w][h] (gen: i32) (hoods: [w][h]hood): [w][h]hood =
   let envs = map2 (\randomish_r hoods_r -> map2 alchemy randomish_r hoods_r)
                   randomish hoods
   in map2 (\r0 r1 -> map2 ageHood r0 r1) randomish
-     (map (\r -> map gravity r) envs)
+          (map (\r -> map gravity r) envs)

@@ -5,16 +5,16 @@ import "world"
 
 let shiftHoods [w][h] (offset: i32) (hoods: [w][h]hood): [w][h]hood =
   let new_offset = if offset == 0 then -1 else 0
-  in map (\x -> map (\y ->
-                     let ul = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
-                     let dl = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+1)
-                     let ur = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+0)
-                     let dr = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+1)
-                     in hoodFromQuadrants ul ur dl dr)
-          (iota h)) (iota w)
+  let f x y =
+    let ul = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+0)
+    let dl = worldIndex offset hoods (x*2+new_offset+0, y*2+new_offset+1)
+    let ur = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+0)
+    let dr = worldIndex offset hoods (x*2+new_offset+1, y*2+new_offset+1)
+    in hoodFromQuadrants ul ur dl dr
+  in tabulate_2d w h f
 
-  let divRoundingUp (x: i32) (y: i32): i32 =
-    (x + y - 1) / y
+let divRoundingUp (x: i32) (y: i32): i32 =
+  (x + y - 1) / y
 
 type game_state [w][h] = {generation: i32,   -- generation
                           hoods: [w][h]hood, -- world data
@@ -118,8 +118,8 @@ let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
                   else if t < 0f32 then 0f32
                   else t
           in dist_sq p
-  ((v.1) + t * (w.1 - v.1),
-   (v.2) + t * (w.2 - v.2))
+                     ((v.1) + t * (w.1 - v.1),
+                      (v.2) + t * (w.2 - v.2))
 
 
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
@@ -132,19 +132,18 @@ entry add_element [h][w]
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let to   = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (c1,c2)
   let offset = gen % 2
-  let hoods' =
-    map (\x -> map (\y ->
-                    let (ul, ur, dl, dr) = hoodQuadrants hoods[x,y]
-                    let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
-                    let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
-                    let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
-                    let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
-                    in hoodFromQuadrants
-                       (if line_dist ul_p from to < r32 r && ul == nothing then elem else ul)
-                       (if line_dist ur_p from to < r32 r && ur == nothing then elem else ur)
-                       (if line_dist dl_p from to < r32 r && dl == nothing then elem else dl)
-                       (if line_dist dr_p from to < r32 r && dr == nothing then elem else dr))
-         (iota h)) (iota w)
+  let f x y =
+    let (ul, ur, dl, dr) = hoodQuadrants hoods[x,y]
+    let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
+    let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
+    let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
+    let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
+    in hoodFromQuadrants
+       (if line_dist ul_p from to < r32 r && ul == nothing then elem else ul)
+       (if line_dist ur_p from to < r32 r && ur == nothing then elem else ur)
+       (if line_dist dl_p from to < r32 r && dl == nothing then elem else dl)
+       (if line_dist dr_p from to < r32 r && dr == nothing then elem else dr)
+  let hoods' = tabulate_2d w h f
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
 entry clear_element [h][w]
@@ -154,19 +153,18 @@ entry clear_element [h][w]
   let from = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let to   = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (c1,c2)
   let offset = gen % 2
-  let hoods' =
-    map (\x -> map (\y ->
-                    let (ul, ur, dl, dr) = unsafe hoodQuadrants hoods[x,y]
-                    let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
-                    let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
-                    let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
-                    let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
-                    in hoodFromQuadrants
-                       (if line_dist ul_p from to < r32 r then nothing else ul)
-                       (if line_dist ur_p from to < r32 r then nothing else ur)
-                       (if line_dist dl_p from to < r32 r then nothing else dl)
-                       (if line_dist dr_p from to < r32 r then nothing else dr))
-         (iota h)) (iota w)
+  let f x y =
+    let (ul, ur, dl, dr) = unsafe hoodQuadrants hoods[x,y]
+    let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
+    let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
+    let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
+    let dr_p = ((x*2)+offset+1, (y*2)+offset+1)
+    in hoodFromQuadrants
+       (if line_dist ul_p from to < r32 r then nothing else ul)
+       (if line_dist ur_p from to < r32 r then nothing else ur)
+       (if line_dist dl_p from to < r32 r then nothing else dl)
+       (if line_dist dr_p from to < r32 r then nothing else dr)
+  let hoods' = tabulate_2d w h f
   in {generation=gen, hoods=hoods', width=ww, height=wh}
 
 
