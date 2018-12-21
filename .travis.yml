@@ -13,7 +13,6 @@ addons:
     - libffi6
     - ocl-icd-libopencl1
     - opencl-headers
-    - pybind11-dev
 
 before_install:
  # install Futhark
@@ -22,7 +21,7 @@ before_install:
  - (cd futhark-nightly-linux-x86_64/ && PREFIX=$HOME/.local make install)
 
 install:
-  - pip install -r requirements.txt
+  - true
 
 script:
   - make
