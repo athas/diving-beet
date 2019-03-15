@@ -21,7 +21,7 @@ before_install:
  - (cd futhark-nightly-linux-x86_64/ && PREFIX=$HOME/.local make install)
 
 install:
-  - true
+  - pip install -r requirements.txt
 
 script:
   - make
