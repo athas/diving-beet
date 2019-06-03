@@ -49,7 +49,7 @@ let hash(x: i32): i32 =
   x
 
 -- An array with a "random" number for every hood.
-let hoodRandoms ((w,h): (i32,i32)) ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
+let hoodRandoms w h ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
   map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h))
       |> unflatten w h
 
@@ -108,7 +108,7 @@ let gravity (h: hood): hood =
 -- Compute interactions and aging for every hood, returning a new
 -- array of hoods.
 let one_step [w][h] (gen: i32) (hoods: [w][h]hood): [w][h]hood =
-  let randomish = hoodRandoms (w,h) (0,10000) gen
+  let randomish = hoodRandoms w h (0,10000) gen
   let envs = map2 (\randomish_r hoods_r -> map2 alchemy randomish_r hoods_r)
                   randomish hoods
   in map2 (\r0 r1 -> map2 ageHood r0 r1) randomish

@@ -109,17 +109,17 @@ func (g Game) Elements() []Element {
 	for i := 0; i < (int)(num_elements); i++ {
 		element := *(*C.uchar)(unsafe.Pointer(((uintptr)(elements)) + (uintptr)(i)))
 
-		var name_fut *C.struct_futhark_i32_1d
+		var name_fut *C.struct_futhark_u8_1d
 
 		C.futhark_entry_element_name(g.ctx, &name_fut, element)
-		defer C.futhark_free_i32_1d(g.ctx, name_fut)
+		defer C.futhark_free_u8_1d(g.ctx, name_fut)
 
-		num_chars := (int)(*C.futhark_shape_i32_1d(g.ctx, name_fut))
+		num_chars := (int)(*C.futhark_shape_u8_1d(g.ctx, name_fut))
 
-		name := C.malloc(C.ulong(num_chars) * 4)
+		name := C.malloc(C.ulong(num_chars))
 		defer C.free(name)
 
-		C.futhark_values_i32_1d(g.ctx, name_fut, (*C.int)(name))
+		C.futhark_values_u8_1d(g.ctx, name_fut, (*C.uchar)(name))
 
 		ret[i] = Element{element, g.elementName(element)}
 	}
@@ -140,21 +140,21 @@ func (g Game) elementName(element C.uchar) string {
 		return name
 	}
 
-	var name_fut *C.struct_futhark_i32_1d
+	var name_fut *C.struct_futhark_u8_1d
 
 	C.futhark_entry_element_name(g.ctx, &name_fut, element)
-	defer C.futhark_free_i32_1d(g.ctx, name_fut)
+	defer C.futhark_free_u8_1d(g.ctx, name_fut)
 
-	num_chars := (int)(*C.futhark_shape_i32_1d(g.ctx, name_fut))
+	num_chars := (int)(*C.futhark_shape_u8_1d(g.ctx, name_fut))
 
-	name := C.malloc(C.ulong(num_chars) * 4)
+	name := C.malloc(C.ulong(num_chars))
 	defer C.free(name)
 
-	C.futhark_values_i32_1d(g.ctx, name_fut, (*C.int)(name))
+	C.futhark_values_u8_1d(g.ctx, name_fut, (*C.uchar)(name))
 
 	s := ""
 	for i := 0; i < num_chars; i++ {
-		s += string((int32)(*(*int32)(unsafe.Pointer(((uintptr)(name)) + ((uintptr)(i) * 4)))))
+		s += string((uint8)(*(*uint8)(unsafe.Pointer(((uintptr)(name)) + ((uintptr)(i))))))
 	}
 
 	g.nameCache[element] = s

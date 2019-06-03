@@ -185,7 +185,7 @@ entry insertable_elements =
   , turnip
   , wall ]
 
-entry element_name(x: element): []i32 =
+entry element_name(x: element): []u8 =
   if x == nothing then "nothing"
   else if x == steam_water then "steam"
   else if x == steam_condensed then "condensate"
