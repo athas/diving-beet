@@ -24,7 +24,7 @@ type game_state [w][h] = {generation: i32,   -- generation
 
 -- | The un-parameterised game state type that we expose to the
 -- outside world.
-type ext_game_state = game_state [] []
+type~ ext_game_state = game_state [] []
 
 let new_game_with (ww:i32,wh:i32) (e: element): ext_game_state =
   let w = divRoundingUp ww 2
@@ -113,13 +113,13 @@ entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
 let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
   let l2 = dist_sq v w
   in if l2 == 0f32 then dist_sq p v
-     else let t = ((p.1 - v.1) * (w.1 - v.1) + (p.2 - v.2) * (w.2 - v.2)) / l2
+     else let t = ((p.0 - v.0) * (w.0 - v.0) + (p.1 - v.1) * (w.1 - v.1)) / l2
           let t = if t > 1f32 then 1f32
                   else if t < 0f32 then 0f32
                   else t
           in dist_sq p
-                     ((v.1) + t * (w.1 - v.1),
-                      (v.2) + t * (w.2 - v.2))
+                     ((v.0) + t * (w.0 - v.0),
+                      (v.1) + t * (w.1 - v.1))
 
 
 let line_dist (p: (i32,i32)) (v: (i32,i32)) (w: (i32,i32)): f32 =
