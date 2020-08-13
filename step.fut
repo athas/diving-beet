@@ -39,7 +39,7 @@ let worldIndex [w][h] (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): elem
   -- Then read if we are in-bounds.
   in if hx < 0 || hx >= w || hy < 0 || hy >= h
      then nothing
-     else hoodQuadrant (unsafe elems[hx,hy]) (ix+iy*2)
+     else hoodQuadrant (#[unsafe] elems[hx,hy]) (ix+iy*2)
 
 -- From http://stackoverflow.com/a/12996028
 let hash(x: i32): i32 =

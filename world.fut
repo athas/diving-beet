@@ -70,5 +70,5 @@ let age (r: i32) (x: element): element =
   else if x == steam_water then if r < 100 then water else steam_water
   else if x == steam_condensed then if r < 500 then water else steam_condensed
   else if x == napalm then if r < 10 then nothing else napalm
-  else if x == turnip then unsafe elems[r%num_elems]
+  else if x == turnip then #[unsafe] elems[r%num_elems]
   else x

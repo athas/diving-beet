@@ -106,8 +106,8 @@ entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
      let dist_to_mouse = dist_sq (f32p (x',y')) (f32p mouse_pos)
      let on_select_border = t32 (f32.round (f32.sqrt dist_to_mouse)) == r
      in if x' >= 0 && x' < ww && y' >= 0 && y' < wh && !on_select_border
-        then unsafe world_pixels[x', y']
-        else 0xFFFFFFFF)
+        then #[unsafe] world_pixels[x', y']
+        else i32.u32 0xFFFFFFFF)
   in map (\y -> map (`screen_pixel` y) (iota sw)) (iota sh)
 
 let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =
@@ -154,7 +154,7 @@ entry clear_element [h][w]
   let to   = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (c1,c2)
   let offset = gen % 2
   let f x y =
-    let (ul, ur, dl, dr) = unsafe hoodQuadrants hoods[x,y]
+    let (ul, ur, dl, dr) = #[unsafe] hoodQuadrants hoods[x,y]
     let ul_p = ((x*2)+offset+0, (y*2)+offset+0)
     let ur_p = ((x*2)+offset+1, (y*2)+offset+0)
     let dl_p = ((x*2)+offset+0, (y*2)+offset+1)
