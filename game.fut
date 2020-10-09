@@ -103,7 +103,7 @@ entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
   let particle_pixel (x: i64) (y: i64) =
     elemColour (worldIndex offset hoods (i32.i64 x, i32.i64 y))
   let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
-  let screen_pixel (x: i64) (y: i64) =
+  let screen_pixel (y: i64) (x: i64) =
     (let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
      let dist_to_mouse = dist_sq (f32p (x',y')) (f32p mouse_pos)
      let on_select_border = t32 (f32.round (f32.sqrt dist_to_mouse)) == r
