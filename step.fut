@@ -37,7 +37,7 @@ let worldIndex [w][h] (offset: i32) (elems: [w][h]hood) ((x,y): (i32,i32)): elem
   let (hy,iy) = indexToHood offset y
 
   -- Then read if we are in-bounds.
-  in if hx < 0 || hx >= w || hy < 0 || hy >= h
+  in if hx < 0 || hx >= i32.i64 w || hy < 0 || hy >= i32.i64 h
      then nothing
      else hoodQuadrant (#[unsafe] elems[hx,hy]) (ix+iy*2)
 
@@ -50,8 +50,9 @@ let hash(x: i32): i32 =
 
 -- An array with a "random" number for every hood.
 let hoodRandoms w h ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
-  map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower) (iota (w*h))
-      |> unflatten w h
+  map i32.i64 (iota (w*h))
+  |> map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower)
+  |> unflatten w h
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.

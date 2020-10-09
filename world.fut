@@ -41,7 +41,7 @@ let elems: []element = [ nothing
                        , napalm
                        , turnip ]
 
-let num_elems: i32 = length elems
+let num_elems = i32.i64 (length elems)
 
 let isWall (x: element): bool =
   x == torch || x == plant || x == spout || x == metal || x == wall
