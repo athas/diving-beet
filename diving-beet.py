@@ -82,6 +82,7 @@ def advance():
 
 saved = None
 
+pointing_at_name = ''
 while True:
     start = time.time()
     if not paused:
