@@ -25,7 +25,7 @@ You can insert particles by left-clicking, although you can't
 overwrite anything that's already there.  Right-click to delete
 particles.  Use PageUp/PageDown to select the particle to insert, and
 the scroll wheel to control the modification radius.  Zoom with plus
-and minus and use the arrow keys to move around.
+and minus (or `p` and `l`) and use the arrow keys to move around.
 
 ## Using the GPU
 
