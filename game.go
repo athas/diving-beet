@@ -4,8 +4,6 @@ package main
 
 // #include "game.h"
 // #include "stdlib.h"
-// #cgo !darwin LDFLAGS: -lOpenCL -lm
-// #cgo darwin LDFLAGS: -framework OpenCL
 import "C"
 
 import (
