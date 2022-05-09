@@ -23,8 +23,9 @@ $ ./diving-beet
 
 You can insert particles by left-clicking, although you can't
 overwrite anything that's already there.  Right-click to delete
-particles.  Use the left/right arrow keys to select the particle to
-insert, and the scroll wheel to control the modification radius.
+particles.  Use PageUp/PageDown to select the particle to insert, and
+the scroll wheel to control the modification radius.  Zoom with plus
+and minus and use the arrow keys to move around.
 
 ## Using the GPU
 
