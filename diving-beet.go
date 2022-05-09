@@ -32,6 +32,10 @@ func max(x, y float64) float64 {
 	}
 }
 
+func ctrlDown() bool {
+	return (sdl.GetModState() & sdl.KMOD_LCTRL) != 0
+}
+
 func main() {
 	var err error
 
@@ -147,30 +151,11 @@ func main() {
 	onKeyboard := func(t sdl.KeyboardEvent) {
 		if t.Type == sdl.KEYDOWN {
 			switch t.Keysym.Sym {
-			case sdl.K_RIGHT:
-				ul_x += 0.01
-				rebound()
-			case sdl.K_LEFT:
-				ul_x -= 0.01
-				rebound()
-			case sdl.K_UP:
-				ul_y -= 0.01
-				rebound()
-			case sdl.K_DOWN:
-				ul_y += 0.01
-				rebound()
-			case sdl.K_PLUS, sdl.K_p:
-				scale = max(1/min(float64(screenX), float64(screenY)), scale*0.99)
-				rebound()
-			case sdl.K_MINUS, sdl.K_l:
-				scale = min(1.0, scale*1.01)
-				rebound()
 			case sdl.K_SPACE:
 				paused = true
 				game.Step()
 			case sdl.K_RETURN:
 				paused = false
-
 			case sdl.K_PAGEUP:
 				selected_element = (selected_element + 1) % len(insertable_elements)
 			case sdl.K_PAGEDOWN:
@@ -186,27 +171,45 @@ func main() {
 	}
 
 	onMouseWheel := func(t sdl.MouseWheelEvent) {
-		radius += t.Y
-		if radius < 1 {
-			radius = 1
+		if ctrlDown() {
+			if t.Y > 0 {
+				scale = max(1/min(float64(screenX), float64(screenY)), scale*0.99)
+				rebound()
+			} else {
+				scale = min(1.0, scale*1.01)
+				rebound()
+			}
+		} else {
+			radius += t.Y
+			if radius < 1 {
+				radius = 1
+			}
 		}
 	}
 
 	checkMouse := func() {
 		x, y, s := sdl.GetMouseState()
+
 		if !mouse_down && s != 0 {
 			mouse_down = true
 			last_mouse_x = x
 			last_mouse_y = y
 		}
-
 		if mouse_down {
 			if s == 0 {
 				mouse_down = false
-			} else if (s & sdl.ButtonLMask()) != 0 {
-				game.AddElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius, insertable_elements[selected_element])
-			} else if (s & sdl.ButtonRMask()) != 0 {
-				game.ClearElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius)
+			}
+			if ctrlDown() {
+				ul_x -= float64(x-last_mouse_x)/float64(screenX)
+				ul_y -= float64(y-last_mouse_y)/float64(screenY)
+				rebound()
+			} else {
+				if (s & sdl.ButtonLMask()) != 0 {
+					game.AddElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius, insertable_elements[selected_element])
+				} else if (s & sdl.ButtonRMask()) != 0 {
+					game.ClearElem(ul_x, ul_y, scale, last_mouse_x, last_mouse_y, x, y, radius)
+				}
+
 			}
 		}
 

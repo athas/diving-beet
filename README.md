@@ -21,11 +21,20 @@ $ make
 $ ./diving-beet
 ```
 
-You can insert particles by left-clicking, although you can't
-overwrite anything that's already there.  Right-click to delete
-particles.  Use PageUp/PageDown to select the particle to insert, and
-the scroll wheel to control the modification radius.  Zoom with plus
-and minus (or `p` and `l`) and use the arrow keys to move around.
+### Controls
+
+| Action | Consequence |
+| --- | --- |
+| Left-click | Insert particles |
+| Right-click | Delete particles |
+| Scroll | Change modification radius |
+| Ctrl+Scroll | Zoom |
+| Ctrl+drag | Move |
+| PageUp/PageDown | Select particle to insert |
+| Space | Single-step |
+| Return | Unpause |
+
+
 
 ## Using the GPU
 
