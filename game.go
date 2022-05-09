@@ -10,7 +10,6 @@ import "C"
 
 import (
 	"unsafe"
-	"os"
 )
 
 type Game struct {
@@ -31,8 +30,6 @@ type Element struct {
 func NewGame(screenX, screenY int32) Game {
 	// Setup Futhark-side stuff.
 	cfg := C.futhark_context_config_new()
-	C.futhark_context_config_set_device(cfg, C.CString(os.Getenv("OPENCL_DEVICE")))
-
 	ctx := C.futhark_context_new(cfg)
 
 	var state *C.struct_futhark_opaque_ext_game_state
@@ -48,9 +45,9 @@ func NewGame(screenX, screenY int32) Game {
 
 func (g *Game) Free() {
 	C.free(g.Frame)
-	C.futhark_context_config_free(g.cfg)
 	C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
 	C.futhark_context_free(g.ctx)
+	C.futhark_context_config_free(g.cfg)
 }
 
 func (g *Game) Step() {
@@ -62,8 +59,8 @@ func (g Game) Render(ul_x, ul_y, scale float64, screenX, screenY, mouse_x, mouse
 	var frame_fut *C.struct_futhark_u32_2d
 	C.futhark_entry_render(g.ctx, &frame_fut, g.state,
 		C.float(ul_x), C.float(ul_y), C.float(scale),
-		C.int64_t(int64(screenX)), C.int64_t(int64(screenY)),
-		C.int64_t(int64(mouse_x)), C.int64_t(int64(mouse_y)), C.int32_t(radius))
+		C.int64_t(screenX), C.int64_t(screenY),
+		C.int64_t(mouse_x), C.int64_t(mouse_y), C.int32_t(radius))
 	defer C.futhark_free_u32_2d(g.ctx, frame_fut)
 	C.futhark_values_u32_2d(g.ctx, frame_fut, (*C.uint32_t)(g.Frame))
 }

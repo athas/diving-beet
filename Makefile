@@ -1,18 +1,13 @@
 FUTHARK_SRC=alchemy.fut game.fut step.fut world.fut
+FUTHARK_BACKEND?=multicore
 
-all: game.py
-
-run: game.py
-	python diving-beet.py
+all: diving-beet
 
 game.py: $(FUTHARK_SRC) lib
 	futhark pyopencl --library game.fut
 
 game.c: *.fut lib
-	futhark opencl --library game.fut
-
-_game.so: game.c
-	build_futhark_ffi game
+	futhark $(FUTHARK_BACKEND) --library game.fut
 
 lib: futhark.pkg
 	futhark pkg sync

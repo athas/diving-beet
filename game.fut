@@ -97,19 +97,19 @@ let f32p (x:i32,y:i32): (f32,f32) =
 
 entry render ({generation=gen,hoods,width=ww,height=wh}: ext_game_state)
              (ul_x: f32) (ul_y: f32) (s: f32) (sw: i64) (sh: i64)
-             (b1: i64) (b2: i64) (r: i32) =
+             (b1: i64) (b2: i64) (r: i32) : [sh][sw]u32 =
   let mouse_pos = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (b1,b2)
   let offset = gen % 2
   let particle_pixel (x: i64) (y: i64) =
     elemColour (worldIndex offset hoods (i32.i64 x, i32.i64 y))
   let world_pixels = map (\x -> map (particle_pixel x) (iota wh)) (iota ww)
   let screen_pixel (y: i64) (x: i64) =
-    (let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
-     let dist_to_mouse = dist_sq (f32p (x',y')) (f32p mouse_pos)
-     let on_select_border = t32 (f32.round (f32.sqrt dist_to_mouse)) == r
-     in if x' >= 0 && x' < i32.i64 ww && y' >= 0 && y' < i32.i64 wh && !on_select_border
-        then #[unsafe] world_pixels[x', y']
-        else 0xFFFFFFFF)
+    let (x',y') = screen_point_to_world_point (ul_x,ul_y) s (sw,sh) (ww,wh) (x,y)
+    let dist_to_mouse = dist_sq (f32p (x',y')) (f32p mouse_pos)
+    let on_select_border = t32 (f32.round (f32.sqrt dist_to_mouse)) == r
+    in if x' >= 0 && x' < i32.i64 ww && y' >= 0 && y' < i32.i64 wh && !on_select_border
+       then #[unsafe] world_pixels[x', y']
+       else 0xFFFFFFFF
   in tabulate_2d sh sw screen_pixel
 
 let line_dist_sq (p: (f32,f32)) (v: (f32,f32)) (w: (f32,f32)): f32 =

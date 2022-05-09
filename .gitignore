@@ -1,8 +1,5 @@
-TAGS
-*.pyc
-game.py
 *.c
 *.h
-game
+game.json
 lib
 diving-beet
