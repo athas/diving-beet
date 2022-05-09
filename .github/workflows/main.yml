@@ -20,6 +20,11 @@ jobs:
           (cd futhark-nightly-linux-x86_64/ && PREFIX=$HOME/.local make install)
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+    - name: Check versions
+      run: |
+        go version
+        futhark --version
+
     - name: Build
       run: |
         make
