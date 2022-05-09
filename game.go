@@ -4,6 +4,8 @@ package main
 
 // #include "game.h"
 // #include "stdlib.h"
+// #cgo !darwin LDFLAGS: -lm
+// #cgo darwin LDFLAGS:
 import "C"
 
 import (
