@@ -4,8 +4,9 @@ package main
 
 // #include "game.h"
 // #include "stdlib.h"
-// #cgo !darwin LDFLAGS: -lm
-// #cgo darwin LDFLAGS:
+// #cgo opencl pkg-config: OpenCL
+// #cgo cuda LDFLAGS: -lcuda -lcudart -lnvrtc
+// #cgo LDFLAGS: -lm
 import "C"
 
 import (

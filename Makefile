@@ -16,4 +16,4 @@ clean:
 	rm -rf *.pyc game.py lib diving-beet *.c
 
 diving-beet: game.c diving-beet.go game.go
-	go build
+	go build -tags $(FUTHARK_BACKEND)

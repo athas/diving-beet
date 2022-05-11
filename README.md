@@ -33,3 +33,8 @@ $ ./diving-beet
 | PageUp/PageDown | Select particle to insert |
 | Space | Single-step |
 | Return | Unpause |
+
+## Using the GPU
+
+Set the environment variable `FUTHARK_BACKEND` to `opencl` or `cuda`
+before compiling.
