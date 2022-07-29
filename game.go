@@ -64,6 +64,7 @@ func (g Game) Render(ul_x, ul_y, scale float64, screenX, screenY, mouse_x, mouse
 		C.int64_t(mouse_x), C.int64_t(mouse_y), C.int32_t(radius))
 	defer C.futhark_free_u32_2d(g.ctx, frame_fut)
 	C.futhark_values_u32_2d(g.ctx, frame_fut, (*C.uint32_t)(g.Frame))
+	C.futhark_context_sync(g.ctx)
 }
 
 func (g *Game) AddElem(
@@ -118,6 +119,7 @@ func (g Game) Elements() []Element {
 		defer C.free(name)
 
 		C.futhark_values_u8_1d(g.ctx, name_fut, (*C.uchar)(name))
+		C.futhark_context_sync(g.ctx)
 
 		ret[i] = Element{element, g.elementName(element)}
 	}
@@ -149,6 +151,7 @@ func (g Game) elementName(element C.uchar) string {
 	defer C.free(name)
 
 	C.futhark_values_u8_1d(g.ctx, name_fut, (*C.uchar)(name))
+	C.futhark_context_sync(g.ctx)
 
 	s := ""
 	for i := 0; i < num_chars; i++ {
