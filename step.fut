@@ -52,7 +52,7 @@ let hash(x: i32): i32 =
 let hoodRandoms w h ((lower,upper): (i32,i32)) (gen: i32): [w][h]i32 =
   map i32.i64 (iota (w*h))
   |> map (\i -> (hash (gen ^ i*4)) % (upper-lower+1) + lower)
-  |> unflatten w h
+  |> unflatten
 
 -- Age every cell within a hood.  We use our (single) random number to
 -- generate four new random numbers,which are then used for the aging.

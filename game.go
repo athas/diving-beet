@@ -52,8 +52,9 @@ func (g *Game) Free() {
 }
 
 func (g *Game) Step() {
-	defer C.futhark_free_opaque_ext_game_state(g.ctx, g.state)
-	C.futhark_entry_step(g.ctx, &g.state, g.state)
+	old_state := g.state;
+	defer C.futhark_free_opaque_ext_game_state(g.ctx, old_state)
+	C.futhark_entry_step(g.ctx, &g.state, old_state)
 }
 
 func (g Game) Render(ul_x, ul_y, scale float64, screenX, screenY, mouse_x, mouse_y, radius int32) {
