@@ -3,3 +3,4 @@
 game.json
 lib
 diving-beet
+*.cache

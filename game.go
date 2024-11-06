@@ -6,6 +6,7 @@ package main
 // #include "stdlib.h"
 // #cgo opencl pkg-config: OpenCL
 // #cgo cuda LDFLAGS: -lcuda -lcudart -lnvrtc
+// #cgo hip LDFLAGS: -lamdhip64 -lhiprtc
 // #cgo LDFLAGS: -lm
 import "C"
 
@@ -31,6 +32,7 @@ type Element struct {
 func NewGame(screenX, screenY int32) Game {
 	// Setup Futhark-side stuff.
 	cfg := C.futhark_context_config_new()
+	C.futhark_context_config_set_cache_file(cfg, C.CString("diving-beet.cache"))
 	ctx := C.futhark_context_new(cfg)
 
 	var state *C.struct_futhark_opaque_ext_game_state
