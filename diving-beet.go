@@ -50,7 +50,7 @@ func main() {
 	last_mouse_x := int32(0)
 	last_mouse_y := int32(0)
 	paused := false
-	steps_per_frame := 1
+	steps_per_frame := 20
 
 	game := NewGame(screenX, screenY)
 	defer game.Free()
